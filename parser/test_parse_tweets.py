@@ -13,6 +13,12 @@ class TestTweetDatabase(unittest.TestCase):
         self.assertTrue(tweet.sid == '123')
         self.assertTrue(tweet.text == '456')
 
+    def test_parse_line_without_first_part(self):
+        test_string = '\t123'
+        tweet = TweetDatabase.parse_line(test_string)
+        self.assertTrue(tweet.sid == '')
+        self.assertTrue(tweet.text == '123')
+
     def test_parse_line_without_second_part(self):
         test_string = '123'
         self.assertRaises(InvalidFormatError, TweetDatabase.parse_line, test_string)
