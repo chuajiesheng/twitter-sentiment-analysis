@@ -42,5 +42,11 @@ class TestTweetDatabase(unittest.TestCase):
         self.assertEqual(tweet2.sid, '637666734300901234')
         self.assertEqual(tweet2.text, 'Not Available')
 
+    def test_read_db_with_invalid_path(self):
+        test_db_path = 'test_fixtures/some_wrong_path.db'
+        tweet_db = TweetDatabase(db_path=test_db_path)
+        self.assertRaises(FileNotFoundError, tweet_db.read_db)
+
+
 if __name__ == '__main__':
     unittest.main()
