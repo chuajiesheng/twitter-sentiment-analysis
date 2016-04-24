@@ -10,18 +10,37 @@ class TestTweetDatabase(unittest.TestCase):
     def test_parse_line(self):
         test_string = '123\t456'
         tweet = TweetDatabase.parse_line(test_string)
-        self.assertTrue(tweet.sid == '123')
-        self.assertTrue(tweet.text == '456')
+        self.assertEqual(tweet.sid, '123')
+        self.assertEqual(tweet.text, '456')
 
     def test_parse_line_without_first_part(self):
         test_string = '\t123'
         tweet = TweetDatabase.parse_line(test_string)
-        self.assertTrue(tweet.sid == '')
-        self.assertTrue(tweet.text == '123')
+        self.assertEqual(tweet.sid, '')
+        self.assertEqual(tweet.text, '123')
 
     def test_parse_line_without_second_part(self):
         test_string = '123'
         self.assertRaises(InvalidFormatError, TweetDatabase.parse_line, test_string)
+
+    def test_read_db(self):
+        test_db_path = 'test_fixtures/test_tweets.db'
+        tweet_db = TweetDatabase(db_path=test_db_path)
+        pairs = tweet_db.read_db()
+
+        self.assertEqual(len(pairs), 3)
+
+        tweet0 = pairs[0]
+        self.assertEqual(tweet0.sid, '637641175948712345')
+        self.assertEqual(tweet0.text, 'Not Available')
+
+        tweet1 = pairs[1]
+        self.assertEqual(tweet1.sid, '637651487762551234')
+        self.assertEqual(tweet1.text, '@ah some tweet')
+
+        tweet2 = pairs[2]
+        self.assertEqual(tweet2.sid, '637666734300901234')
+        self.assertEqual(tweet2.text, 'Not Available')
 
 if __name__ == '__main__':
     unittest.main()

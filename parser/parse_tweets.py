@@ -27,7 +27,8 @@ class TweetDatabase:
         return Tweet(pair[0], pair[1])
 
     def read_db(self):
-        lines = [line.rstrip('\n') for line in open(self.db_path)]
+        with open(self.db_path) as f:
+            lines = [line.rstrip('\n') for line in f]
         pairs = list(map(lambda l: TweetDatabase.parse_line(l), lines))
         return pairs
 
