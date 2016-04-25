@@ -60,5 +60,11 @@ class TestSentimentDatabase(unittest.TestCase):
         self.assertEqual(pairs['637666734300901234'], 'positive')
         self.assertEqual(pairs['637651487762551234'], 'negative')
 
+    def test_read_db_with_invalid_label_path(self):
+        test_db_path = 'test_fixtures/test_tweets.db'
+        test_sentiment_db_path = 'test_fixtures/some_wrong_path.db'
+        db = SentimentDatabase(label_db=test_sentiment_db_path, db_path=test_db_path)
+        self.assertRaises(FileNotFoundError, db.read_label_db)
+
 if __name__ == '__main__':
     unittest.main()
