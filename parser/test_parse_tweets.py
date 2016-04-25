@@ -2,6 +2,7 @@
 
 import unittest
 from parse_tweets import *
+from tweet import *
 
 
 class TestTweetDatabase(unittest.TestCase):
@@ -65,6 +66,32 @@ class TestSentimentDatabase(unittest.TestCase):
         test_sentiment_db_path = 'test_fixtures/some_wrong_path.db'
         db = SentimentDatabase(label_db=test_sentiment_db_path, db_path=test_db_path)
         self.assertRaises(FileNotFoundError, db.read_label_db)
+
+    def test_get_labelled_tweets(self):
+        test_db_path = 'test_fixtures/test_tweets.db'
+        test_sentiment_db_path = 'test_fixtures/test_sentiments.db'
+        db = SentimentDatabase(label_db=test_sentiment_db_path, db_path=test_db_path)
+
+        tweets = db.read_db()
+        labels = db.read_label_db()
+
+        labelled_tweets = db.get_labelled_tweets(tweets, labels)
+        labelled_tweets.sort(key=lambda t: t.sid)
+
+        self.assertEqual(len(labelled_tweets), 3)
+
+        tweet0 = labelled_tweets[0]
+        self.assertEqual(tweet0.sid, '637641175948712345')
+        self.assertEqual(tweet0.sentiment, Sentiment.neutral)
+
+        tweet1 = labelled_tweets[1]
+        self.assertEqual(tweet1.sid, '637651487762551234')
+        self.assertEqual(tweet1.sentiment, Sentiment.negative)
+
+        tweet2 = labelled_tweets[2]
+        self.assertEqual(tweet2.sid, '637666734300901234')
+        self.assertEqual(tweet2.sentiment, Sentiment.positive)
+
 
 if __name__ == '__main__':
     unittest.main()

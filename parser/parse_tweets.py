@@ -63,16 +63,16 @@ class SentimentDatabase(TweetDatabase):
 
     @staticmethod
     def get_labelled_tweets(tweets, labels):
-        missing_label = 0
+        missing_tweet = 0
         list_of_labelled_tweets = []
-        for t in tweets:
-            if t.sid not in labels.keys():
-                missing_label += 1
+        for l in labels.keys():
+            if l not in tweets.keys():
+                missing_tweet += 1
                 continue
 
-            list_of_labelled_tweets.append(tweet.SentimentTweet(t, labels[t.sid]))
+            list_of_labelled_tweets.append(tweet.SentimentTweet(tweets[l], labels[l]))
 
-        print('Total missing labels: ', missing_label)
+        print('Total missing labels: ', missing_tweet)
         return list_of_labelled_tweets
 
 
