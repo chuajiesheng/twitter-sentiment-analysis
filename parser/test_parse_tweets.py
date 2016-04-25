@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from parse_tweets import InvalidFormatError
-from parse_tweets import TweetDatabase
+from parse_tweets import *
 
 
 class TestTweetDatabase(unittest.TestCase):
@@ -47,6 +46,19 @@ class TestTweetDatabase(unittest.TestCase):
         tweet_db = TweetDatabase(db_path=test_db_path)
         self.assertRaises(FileNotFoundError, tweet_db.read_db)
 
+
+class TestSentimentDatabase(unittest.TestCase):
+
+    def test_read_db(self):
+        test_db_path = 'test_fixtures/test_tweets.db'
+        test_sentiment_db_path = 'test_fixtures/test_sentiments.db'
+        db = SentimentDatabase(label_db=test_sentiment_db_path, db_path=test_db_path)
+        pairs = db.read_label_db()
+
+        self.assertEqual(len(pairs), 3)
+        self.assertEqual(pairs['637641175948712345'], 'neutral')
+        self.assertEqual(pairs['637666734300901234'], 'positive')
+        self.assertEqual(pairs['637651487762551234'], 'negative')
 
 if __name__ == '__main__':
     unittest.main()
