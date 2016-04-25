@@ -26,8 +26,9 @@ class TweetDatabase:
     def read_db(self):
         with open(self.db_path) as f:
             lines = [line.rstrip('\n') for line in f]
-        tweets = list(map(lambda l: TweetDatabase.parse_line(l), lines))
-        return tweets
+        tweets_arr = list(map(lambda l: TweetDatabase.parse_line(l), lines))
+        tweets_dict = {tweet.sid: tweet for tweet in tweets_arr}
+        return tweets_dict
 
 
 class SentimentDatabase(TweetDatabase):

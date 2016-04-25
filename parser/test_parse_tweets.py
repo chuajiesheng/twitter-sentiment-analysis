@@ -30,15 +30,15 @@ class TestTweetDatabase(unittest.TestCase):
 
         self.assertEqual(len(pairs), 3)
 
-        tweet0 = pairs[0]
+        tweet0 = pairs['637641175948712345']
         self.assertEqual(tweet0.sid, '637641175948712345')
         self.assertEqual(tweet0.text, 'Not Available')
 
-        tweet1 = pairs[1]
+        tweet1 = pairs['637651487762551234']
         self.assertEqual(tweet1.sid, '637651487762551234')
         self.assertEqual(tweet1.text, '@ah some tweet')
 
-        tweet2 = pairs[2]
+        tweet2 = pairs['637666734300901234']
         self.assertEqual(tweet2.sid, '637666734300901234')
         self.assertEqual(tweet2.text, 'Not Available')
 
