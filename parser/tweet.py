@@ -2,13 +2,8 @@
 from enum import Enum, unique
 
 
-class Tweet:
-    sid = None
-    text = None
-
-    def __init__(self, sid, text):
-        self.sid = sid
-        self.text = text
+class InvalidTweetDataError(ValueError):
+    pass
 
 
 @unique
@@ -18,14 +13,19 @@ class Sentiment(Enum):
     positive = 1
 
 
-class SentimentTweet(Tweet):
-    sentiment = Sentiment.neutral
+class Tweet:
+    sid = None
+    sentiment = None
+    text = None
 
-    def __init__(self, tweet, sentiment):
-        assert tweet is not None
-        assert sentiment is not None
-        assert sentiment in [s.name for s in Sentiment]
+    def __init__(self, sid, sentiment, text):
+        invalid_sid = sid is None or len(sid) < 1
+        invalid_text = text is None or len(text) < 1
+        invalid_sentiment = sentiment is None or sentiment not in [s.name for s in Sentiment]
 
-        Tweet.__init__(self, tweet.sid, tweet.text)
+        if invalid_sid or invalid_text or invalid_sentiment:
+            raise InvalidTweetDataError()
+
+        self.sid = sid
+        self.text = text
         self.sentiment = Sentiment[sentiment]
-
