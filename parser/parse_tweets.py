@@ -18,9 +18,14 @@ class TweetDatabase:
 
     @staticmethod
     def parse_line(line):
-        if line is None: raise InvalidFormatError()
+        if line is None:
+            raise InvalidFormatError()
+
         pair = line.split('\t')
-        if len(pair) != 2: raise InvalidFormatError()
+
+        if len(pair) != 2:
+            raise InvalidFormatError()
+        
         return tweet.Tweet(pair[0], pair[1])
 
     def read_db(self):
