@@ -23,9 +23,9 @@ class TweetDatabase:
 
         pair = line.split('\t')
 
-        if len(pair) != 2:
+        if len(pair) < 2:
             raise InvalidFormatError()
-        
+
         return tweet.Tweet(pair[0], pair[1])
 
     def read_db(self):
