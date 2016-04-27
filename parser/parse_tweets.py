@@ -4,6 +4,11 @@ import code
 import logging
 import tweet
 
+# Sentiment Analysis - http://www.nltk.org/howto/sentiment.html
+from nltk.classify import NaiveBayesClassifier
+from nltk.sentiment import SentimentAnalyzer
+from nltk.sentiment import util
+
 FORMAT = '[%(asctime)s][%(levelname)-8s] #%(funcName)-10s → %(message)s'
 logger = None
 
@@ -46,11 +51,34 @@ class TweetDatabase:
         logging.info('Total unique records: %d', len(tweets_dict.items()))
         return tweets_dict
 
+    def get_tokens(self, tweets):
+        return [tweets[k].get_tokens() for k in tweets.keys()]
+
+
 if __name__ == '__main__':
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
     sdb = TweetDatabase()
     tweets = sdb.read_db()
+    dataset = sdb.get_tokens(tweets)
+
+    training_tweets_size = int(len(dataset) / 3)
+    training_tweets = dataset[:training_tweets_size]
+    testing_tweets = dataset[training_tweets_size:]
+
+    sentim_analyzer = SentimentAnalyzer()
+    all_words_neg = sentim_analyzer.all_words([util.mark_negation(d) for d in training_tweets])
+    unigram_feats = sentim_analyzer.unigram_word_feats(all_words_neg, min_freq=4)
+
+    training_set = sentim_analyzer.apply_features(training_tweets)
+    test_set = sentim_analyzer.apply_features(testing_tweets)
+
+    trainer = NaiveBayesClassifier.train
+    classifier = sentim_analyzer.train(trainer, training_set)
+
+    for key, value in sorted(sentim_analyzer.evaluate(test_set).items()):
+        print('{0}: {1}'.format(key, value))
+
     # code.interact(local=locals())
 
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+
 from enum import Enum, unique
+from nltk.tokenize.casual import TweetTokenizer
 
 
 class InvalidTweetDataError(ValueError):
@@ -29,3 +31,7 @@ class Tweet:
         self.sid = sid
         self.text = text
         self.sentiment = Sentiment[sentiment]
+
+    def get_tokens(self):
+        tknzr = TweetTokenizer()
+        return tknzr.tokenize(self.text), self.sentiment.name
