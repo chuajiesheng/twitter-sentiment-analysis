@@ -1,3 +1,2 @@
-from tweet import Tweet
-from parse_tweets import InvalidFormatError
-from parse_tweets import TweetDatabase
+from parser.tweet import *
+from parser.parse_tweets import *
