@@ -41,6 +41,7 @@ class SimpleNaiveBayesClassifier:
         sentim_analyzer = SentimentAnalyzer()
         all_words_neg = sentim_analyzer.all_words([util.mark_negation(d) for d in training_tweets])
         unigram_feats = sentim_analyzer.unigram_word_feats(all_words_neg, min_freq=4)
+        sentim_analyzer.add_feat_extractor(util.extract_unigram_feats, unigrams=unigram_feats)
 
         training_set = sentim_analyzer.apply_features(training_tweets)
         test_set = sentim_analyzer.apply_features(testing_tweets)
