@@ -7,7 +7,7 @@ from nltk.classify import NaiveBayesClassifier
 from nltk.sentiment import SentimentAnalyzer
 from nltk.sentiment import util
 
-from parser.parse_tweets import TweetDatabase
+from parser import TweetDatabase
 
 FORMAT = '[%(asctime)s][%(levelname)-8s] #%(funcName)-10s → %(message)s'
 
