@@ -52,6 +52,7 @@ class SimpleNaiveBayesClassifier:
         return sorted(sentim_analyzer.evaluate(test_set).items())
 
 if __name__ == '__main__':
+    print('------ Simple Naive Bayes Classifier -------')
     snb = SimpleNaiveBayesClassifier()
     snb.init_logging()
     result = snb.train()

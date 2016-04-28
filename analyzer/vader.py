@@ -60,6 +60,7 @@ class VaderClassifier:
         logging.info('Total accuracy: %f', float(correct) / (correct + wrong))
 
 if __name__ == '__main__':
+    print('------------- Vader Classifier -------------')
     vc = VaderClassifier()
     vc.init_logging()
     result = vc.test()
