@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from parse_tweets import *
-from tweet import *
+from parser import *
 
 
 class TestTweetDatabase(unittest.TestCase):
