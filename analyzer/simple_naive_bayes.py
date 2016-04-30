@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 
 # Sentiment Analysis - http://www.nltk.org/howto/sentiment.html
 from nltk.classify import NaiveBayesClassifier
@@ -10,6 +11,8 @@ from nltk.sentiment import util
 from parser import TweetDatabase
 
 FORMAT = '[%(asctime)s][%(levelname)-8s] #%(funcName)-10s → %(message)s'
+OUTPUT_FILE = 'result/{0}/{1}.out'
+CLASSIFIER = 'simple_naive_bayes'
 
 logger = None
 
@@ -57,7 +60,11 @@ if __name__ == '__main__':
     snb.init_logging()
     result = snb.train()
 
-    for key, value in result:
-        print('{0}: {1}'.format(key, value))
+    counter = os.environ['SNAP_PIPELINE_COUNTER']
+    with open(OUTPUT_FILE.format(counter, CLASSIFIER), 'w') as output_file:
+        for key, value in result:
+            output = '{0}: {1}'.format(key, value)
+            print(output)
+            output_file.write(output)
 
     # code.interact(local=locals())
