@@ -9,10 +9,19 @@ Total unique records: 9951
 
 ### Training and Testing
 
+Using 1/3 as training data:
 ```
 Training records: 3,317
 Total unique records: 6,634
 ```
+
+Using 1/2 as training data:
+```
+Training records: 4,975
+Total unique records: 4,976
+```
+
+Unless otherwise specify, the results uses 1/3 of the data as training and 2/3 as testing.
 
 ## Naive Bayes with Unigram Features
 
@@ -68,6 +77,7 @@ Total accuracy: 0.35453723243895086
 
 ### Results
 
+Using 1/3 as training data yield the following:
 ```
 Accuracy: 0.5482363581549593
 F-measure [negative]: 0.34303864478560087
@@ -81,3 +91,16 @@ Recall [neutral]: 0.3958699472759227
 Recall [positive]: 0.73224043715847
 ```
 
+Using 1/2 as training data yield the following:
+```
+Accuracy: 0.5731511254019293
+F-measure [negative]: 0.3804945054945055
+F-measure [neutral]: 0.4470967741935484
+F-measure [positive]: 0.6975537435137138
+Precision [negative]: 0.4196969696969697
+Precision [neutral]: 0.5191011235955056
+Precision [positive]: 0.6313317678631332
+Recall [negative]: 0.3479899497487437
+Recall [neutral]: 0.3926345609065156
+Recall [positive]: 0.779296066252588
+```

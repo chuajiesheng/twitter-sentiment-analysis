@@ -24,7 +24,7 @@ class SimpleNaiveBayesClassifier(Classifier):
         return sdb.get_tokens(tweets)
 
     def split_dataset(self, dataset):
-        training_size = int(len(dataset) / 3)
+        training_size = int(len(dataset) / 2)
         training = dataset[:training_size]
         testing = dataset[training_size:]
         return training, testing
