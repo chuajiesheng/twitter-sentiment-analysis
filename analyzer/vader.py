@@ -16,8 +16,6 @@ class VaderClassifier:
     def __init__(self):
         pass
 
-    def init_logging(self):
-        logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
     def get_tweets(self):
         sdb = TweetDatabase()
