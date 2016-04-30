@@ -30,6 +30,6 @@ class Classifier:
 
     @staticmethod
     def get_output_file(classifier_name):
-        file = Classifier.OUTPUT_FILE.format(Classifier.get_counter(), classifier_name)
-        Classifier.ensure_dir(file)
-        return file
+        f = Classifier.OUTPUT_FILE.format(Classifier.get_counter(), classifier_name)
+        Classifier.ensure_dir(f)
+        return f
