@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 
-import logging
-
-# Sentiment Analysis - http://www.nltk.org/howto/sentiment.html
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from base_classifier import *
 from parser import *
-
-FORMAT = '[%(asctime)s][%(levelname)-8s] #%(funcName)-10s → %(message)s'
 
 logger = None
 
+CLASSIFIER_NAME = 'vader'
 
-class VaderClassifier:
+class VaderClassifier(Classifier):
 
     def __init__(self):
         pass
-
 
     def get_tweets(self):
         sdb = TweetDatabase()
@@ -53,14 +49,20 @@ class VaderClassifier:
             else:
                 wrong += 1
 
-        logging.info('Total correct: %d', correct)
-        logging.info('Total wrong: %d', wrong)
-        logging.info('Total accuracy: %f', float(correct) / (correct + wrong))
+        return correct, wrong
 
 if __name__ == '__main__':
     print('------------- Vader Classifier -------------')
     vc = VaderClassifier()
     vc.init_logging()
-    result = vc.test()
+    correct, wrong = vc.test()
+
+    with open(Classifier.get_output_file(CLASSIFIER_NAME), 'w') as output_file:
+        output = 'Total correct: {}\n'.format(correct)
+        output += 'Total wrong: {}\n'.format(wrong)
+        output += 'Total accuracy: {}\n'.format(float(correct) / (correct + wrong))
+
+        print(output)
+        output_file.write(output)
 
     # code.interact(local=locals())
