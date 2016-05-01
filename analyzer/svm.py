@@ -8,10 +8,10 @@ from nltk.sentiment import util
 from analyzer import Classifier
 from parser import TweetDatabase
 
-CLASSIFIER_NAME = 'multinomial_naive_bayes'
+CLASSIFIER_NAME = 'svm'
 
 
-class MultinomialNaiveBayesClassifier(Classifier):
+class SVMClassifier(Classifier):
 
     dataset = None
 
@@ -30,7 +30,7 @@ class MultinomialNaiveBayesClassifier(Classifier):
         return training, testing
 
     def train(self):
-        mnb = MultinomialNaiveBayesClassifier()
+        mnb = SVMClassifier()
         self.dataset = mnb.get_dataset()
         training_tweets, _ = mnb.split_dataset(self.dataset)
 
@@ -56,7 +56,7 @@ class MultinomialNaiveBayesClassifier(Classifier):
 
 if __name__ == '__main__':
     print('------ SVM Classifier -------')
-    snb = MultinomialNaiveBayesClassifier()
+    snb = SVMClassifier()
     snb.init_logging()
     analyzer = snb.train()
     result = snb.test(analyzer)
