@@ -55,7 +55,7 @@ class MultinomialNaiveBayesClassifier(Classifier):
         return sorted(analyzer.evaluate(test_set).items())
 
 if __name__ == '__main__':
-    print('------ Multinomial Naive Bayes Classifier -------')
+    print('------ SVM Classifier -------')
     snb = MultinomialNaiveBayesClassifier()
     snb.init_logging()
     analyzer = snb.train()
