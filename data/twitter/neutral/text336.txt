@@ -1,0 +1,1 @@
+  it was invented by james gosling at sun microsystems, which was acquired by Oracle the language is primarily based on C and C++

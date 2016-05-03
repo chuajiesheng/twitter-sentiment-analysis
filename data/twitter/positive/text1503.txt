@@ -1,0 +1,1 @@
+@SofiaAizura It may be a driver issue. Contact your laptop service provider to check for latest audio drivers compatible with Windows 10.

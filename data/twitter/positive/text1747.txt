@@ -1,0 +1,1 @@
+. @bzamayo I think you're right. Given Amazon's advances with Alexa Skills Kit and Echo, a 3rd party Siri API has got to be on the cards.

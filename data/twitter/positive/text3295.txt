@@ -1,0 +1,1 @@
+Virtual CICS user group meeting, 8 Sept, with IBM's Keith Allen discussing "Creating an Agile Development Environment while Reducing Cost".

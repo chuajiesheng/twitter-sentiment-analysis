@@ -1,0 +1,1 @@
+  Just a note to anyone running to the light to upgrade to Windows 10. You may experience issues with drivers for video &amp; printers.

@@ -1,0 +1,1 @@
+  What agitates me is the dumb things Oracle does. Change behavior of program but don't change error checking. #FAIL https://t.co/bN3KhhC39a

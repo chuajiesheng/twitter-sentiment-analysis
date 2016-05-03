@@ -1,0 +1,1 @@
+  Intended to finish my Windows 10 slides for the Aug @NelaInfoSec event. Couldn't connect SP3 to internet; gave up. Must complete tomorrow.

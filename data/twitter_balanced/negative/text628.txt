@@ -1,0 +1,1 @@
+  After attempting a reinstall, it still bricks, says, "Windows cannot finish installing," or somesuch. @Microsoft may have cost me $600.

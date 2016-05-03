@@ -1,0 +1,1 @@
+  believe it or don't, but this version of informix isn't supported by anyone anymore. I don't even know whether IBM or Sun own this thing

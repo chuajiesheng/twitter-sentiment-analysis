@@ -1,0 +1,1 @@
+  @SGgrc Oracle DID NOT bring us Java. Sun (and James Gosling) brought us Java. Oracle was just responsible for crapifying it.

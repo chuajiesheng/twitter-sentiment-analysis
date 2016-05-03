@@ -1,0 +1,1 @@
+  Upgraded to Windows 10, and everything was OK until I tried to play a DVD. Be forewarned you may need a separate install. I went for VLC.

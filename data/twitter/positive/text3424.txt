@@ -1,0 +1,1 @@
+@KymLang links are working fine on my IOS device. Some times on the first click I get a "open in safari ?" Cancel it &amp; do a 2nd click. Works

@@ -1,0 +1,1 @@
+  no diff from @Microsoft with BitLocker =at some point, platforms should provide data at rest encryption built in https://t.co/KATCGJER4W
