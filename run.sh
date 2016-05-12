@@ -18,6 +18,6 @@ true
 
 source activate neon && \
 python2 analyzer/recurrent_neural_network.py -e 2 -eval 1 --rlayer_type lstm && \
-source deactivate neon && \
+source deactivate && \
 true
 
