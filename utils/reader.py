@@ -33,4 +33,4 @@ class Reader:
 
     @staticmethod
     def is_tweet(json_object):
-        return 'verb' in json_object and json_object['verb'] == 'post'
+        return 'verb' in json_object and (json_object['verb'] == 'post' or json_object['verb'] == 'share')
