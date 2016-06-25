@@ -1,7 +1,11 @@
+import sys
 import os
 from utils import Reader
 
 if __name__ == '__main__':
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
     working_directory = os.getcwd()
     files = Reader.read_directory(working_directory)
     for f in files:
