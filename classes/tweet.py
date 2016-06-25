@@ -5,3 +5,6 @@ class Tweet:
 
     def timestamp(self):
         return self.data['postedTime']
+
+    def verb(self):
+        return self.data['verb']

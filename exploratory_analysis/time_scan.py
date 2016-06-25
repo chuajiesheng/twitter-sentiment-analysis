@@ -7,5 +7,5 @@ if __name__ == '__main__':
     for f in files:
         tweets = Reader.read_file(f)
         for tweet in tweets:
-            print tweet.timestamp()
+            print '{}, {}'.format(tweet.verb(), tweet.timestamp())
 
