@@ -1,7 +1,7 @@
 import json
 import os
 from classes import Tweet
-import code
+
 
 class Reader:
     def __init__(self):
