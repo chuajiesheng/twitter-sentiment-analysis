@@ -14,8 +14,8 @@ if __name__ == '__main__':
 
     for f in files:
         tweets = Reader.read_file(f)
-        eng_tweets = filter(lambda t: t.language() == 'en', tweets)
-        for tweet in tweets:
+        selected_tweets = filter(lambda t: t.language() == 'en', tweets)
+        for tweet in selected_tweets:
             body = tweet.body().replace('\n', ' ').replace('\r', '').replace('"', '""')
             print '{},{},"{}"'.format(tweet.verb(), tweet.timestamp(), body)
 
