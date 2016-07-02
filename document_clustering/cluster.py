@@ -63,20 +63,20 @@ if __name__ == '__main__':
     files = files[:800]
 
     all_tweets = []
+    totalvocab_stemmed = []
+    totalvocab_tokenized = []
+
     for f in files:
         tweets = Reader.read_file(f)
         selected_tweets = filter(lambda t: t.is_post() and t.language() == 'en', tweets)
         texts = map(lambda t: t.body(), selected_tweets)
-        all_tweets.extend(texts)
 
-    totalvocab_stemmed = []
-    totalvocab_tokenized = []
-    for i in all_tweets:
-        allwords_stemmed = tokenize_and_stem(i)  # for each item in 'all_tweets', tokenize/stem
-        totalvocab_stemmed.extend(allwords_stemmed)  # extend the 'totalvocab_stemmed' list
+        for i in texts:
+            allwords_stemmed = tokenize_and_stem(i)  # for each item in 'all_tweets', tokenize/stem
+            totalvocab_stemmed.extend(allwords_stemmed)  # extend the 'totalvocab_stemmed' list
 
-        allwords_tokenized = tokenize_only(i)
-        totalvocab_tokenized.extend(allwords_tokenized)
+            allwords_tokenized = tokenize_only(i)
+            totalvocab_tokenized.extend(allwords_tokenized)
 
     vocab_frame = pd.DataFrame({'words': totalvocab_tokenized}, index=totalvocab_stemmed)
     print 'there are ' + str(vocab_frame.shape[0]) + ' items in vocab_frame'
