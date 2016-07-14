@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 from pyspark.sql import SQLContext
 sqlContext = SQLContext(sc)
 
-directory = "/Volumes/JS'S FIT/json"
+directory = "/Volumes/JS'S FIT/gnip-json"
 datasets = sqlContext.read.json(directory)
 
 file_count = datasets.where(datasets['verb'].isNull()).count()
