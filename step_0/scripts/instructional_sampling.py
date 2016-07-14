@@ -34,9 +34,9 @@ print '{} shares'.format(all_shares_count)
 assert all_tweets_count[0][0] == all_posts_count + all_shares_count
 
 sample_seed = 2016
-fraction = 0.000022 # this give 30 samples
-sample_posts = all_posts.sample(False, fraction, sample_seed)
-sample_posts_count = sample_posts.count()
+number_of_instructional_samples = 30
+sample_posts = all_posts.rdd.takeSample(False, number_of_instructional_samples, sample_seed)
+sample_posts_count = len(sample_posts)
 print '{} sample posts'.format(sample_posts_count)
 
 sample_posts_file = "./output/sample_posts.json"
