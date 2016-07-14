@@ -33,9 +33,28 @@ print '{} shares'.format(all_shares_count)
 
 assert all_tweets_count[0][0] == all_posts_count + all_shares_count
 
+retweeted_post_ids = all_shares.select(all_shares['object.id'].alias('id')).rdd.map(lambda x: x.id).distinct()
+post_ids = all_posts.select('id').rdd.map(lambda x: x.id).distinct()
+keep_retweeted_post_ids = retweeted_post_ids.subtract(post_ids).collect()
+assert len(keep_retweeted_post_ids) < retweeted_post_ids.count()
+
+from pyspark.sql.types import BooleanType
+from pyspark.sql.functions import udf
+exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
+tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id'))))
+
+# validity check for tweets_pool
+all_posts_ids = post_ids.collect()
+validity_1 = udf(lambda x: x not in all_posts_ids, BooleanType())
+validity_2 = udf(lambda x: x not in keep_retweeted_post_ids, BooleanType())
+invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'post').where(validity_1(col('id')))
+assert invalid_tweets.count() == 0
+invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'share').where(validity_2(col('object.id')))
+assert invalid_tweets.count() == 0
+
 sample_seed = 2016
 number_of_instructional_samples = 30
-sample_posts = all_posts.rdd.takeSample(False, number_of_instructional_samples, sample_seed)
+sample_posts = tweets_pool.rdd.takeSample(False, number_of_instructional_samples, sample_seed)
 sample_posts_count = len(sample_posts)
 print '{} sample posts'.format(sample_posts_count)
 
