@@ -11,8 +11,8 @@ directory = "/Volumes/JS'S FIT/gnip-json"
 datasets = sqlContext.read.json(directory)
 
 file_count = datasets.where(datasets['verb'].isNull()).count()
-assert file_count == 21888
 # expecting 21888
+assert file_count == 21888
 
 info_dataset = datasets.select('info')
 info_dataset.registerTempTable('info')
@@ -21,15 +21,15 @@ all_tweets_count = info_dataset.select('info.activity_count').groupBy().sum('act
 
 all_posts = datasets.where(datasets['verb'] == 'post')
 all_posts_count = all_posts.count()
+# expecting 1570398
 assert all_posts_count == 1570398
 print '{} posts'.format(all_posts_count)
-# expecting 1570398
 
 all_shares = datasets.where(datasets['verb'] == 'share')
 all_shares_count = all_shares.count()
+# expecting 1112590
 assert all_shares_count == 1112590
 print '{} shares'.format(all_shares_count)
-# expecting 1112590
 
 assert all_tweets_count[0][0] == all_posts_count + all_shares_count
 
