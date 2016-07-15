@@ -66,10 +66,11 @@ lengths_np = np.array(tweets_pool_str_lengths)
 p = np.percentile(lengths_np, 20)
 final_tweets_pool = tweets_pool.filter(length('body') >= p)
 final_tweets_pool_count = final_tweets_pool.count()
+assert (float(final_tweets_pool_count) / tweets_pool_count) > 0.8
 
 sample_seed = 2016
 number_of_instructional_samples = 30
-sample_posts = tweets_pool.rdd.takeSample(False, number_of_instructional_samples, sample_seed)
+sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
 sample_posts_count = len(sample_posts)
 print '{} sample posts'.format(sample_posts_count)
 
