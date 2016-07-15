@@ -42,7 +42,12 @@ from pyspark.sql.types import BooleanType
 from pyspark.sql.functions import udf
 from pyspark.sql.functions import col
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
-tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id'))))
+tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).filter("twitter_lang = 'en'")
+
+# check languages
+languages = tweets_pool.select('twitter_lang').distinct()
+assert languages.count() == 1
+assert languages.first()['twitter_lang'] == 'en'
 
 # validity check for tweets_pool
 all_posts_ids = post_ids.collect()
