@@ -40,6 +40,7 @@ assert len(keep_retweeted_post_ids) < retweeted_post_ids.count()
 
 from pyspark.sql.types import BooleanType
 from pyspark.sql.functions import udf
+from pyspark.sql.functions import col
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
 tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id'))))
 
