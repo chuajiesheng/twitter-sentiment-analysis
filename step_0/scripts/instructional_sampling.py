@@ -53,6 +53,15 @@ assert invalid_tweets.count() == 0
 invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'share').where(validity_2(col('object.id')))
 assert invalid_tweets.count() == 0
 
+from pyspark.sql.functions import length
+tweets_pool_count = tweets_pool.count()
+tweets_pool_str_lengths = tweets_pool.select(length('body').alias('length')).rdd.map(lambda x: x.length).collect()
+import numpy as np
+lengths_np = np.array(tweets_pool_str_lengths)
+p = np.percentile(lengths_np, 20)
+final_tweets_pool = tweets_pool.filter(length('body') >= p)
+final_tweets_pool_count = final_tweets_pool.count()
+
 sample_seed = 2016
 number_of_instructional_samples = 30
 sample_posts = tweets_pool.rdd.takeSample(False, number_of_instructional_samples, sample_seed)
