@@ -1,10 +1,13 @@
-# coding=utf-8
 import sys
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import *
+import numpy as np
+
+# coding=utf-8
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 # sc is an existing SparkContext.
-from pyspark.sql import SQLContext
 sqlContext = SQLContext(sc)
 
 directory = "/Volumes/JS'S FIT/gnip-json"
@@ -39,8 +42,6 @@ keep_retweeted_post_ids = retweeted_post_ids.subtract(post_ids).collect()
 assert len(keep_retweeted_post_ids) < retweeted_post_ids.count()
 
 from pyspark.sql.types import BooleanType
-from pyspark.sql.functions import udf
-from pyspark.sql.functions import col
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
 tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).filter("twitter_lang = 'en'")
 
@@ -58,10 +59,8 @@ assert invalid_tweets.count() == 0
 invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'share').where(validity_2(col('object.id')))
 assert invalid_tweets.count() == 0
 
-from pyspark.sql.functions import length
 tweets_pool_count = tweets_pool.count()
 tweets_pool_str_lengths = tweets_pool.select(length('body').alias('length')).rdd.map(lambda x: x.length).collect()
-import numpy as np
 lengths_np = np.array(tweets_pool_str_lengths)
 p = np.percentile(lengths_np, 20)
 final_tweets_pool = tweets_pool.filter(length('body') >= p)
