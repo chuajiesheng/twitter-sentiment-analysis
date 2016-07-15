@@ -75,8 +75,8 @@ sample_posts_count = len(sample_posts)
 print '{} sample posts'.format(sample_posts_count)
 
 sample_posts_file = "./output/sample_posts.json"
-sample_posts_jsons = sample_posts.toJSON().collect()
-with open(sample_posts_file, 'a') as f:
+sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
+with open(sample_posts_file, 'w') as f:
 	for post in sample_posts_jsons:
 		f.write(post)
 		f.write('\n')
