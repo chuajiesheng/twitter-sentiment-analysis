@@ -49,8 +49,9 @@ if all_tweets_count[0][0] != all_posts_count + all_shares_count:
 retweeted_post_ids = all_shares.select(all_shares['object.id'].alias('id')).rdd.map(lambda x: x.id).distinct()
 post_ids = all_posts.select('id').rdd.map(lambda x: x.id).distinct()
 keep_retweeted_post_ids = retweeted_post_ids.subtract(post_ids).collect()
-assert len(keep_retweeted_post_ids) < retweeted_post_ids.count()
-if len(keep_retweeted_post_ids) >= retweeted_post_ids.count():
+retweeted_post_ids_count = retweeted_post_ids.count()
+assert len(keep_retweeted_post_ids) < retweeted_post_ids_count
+if len(keep_retweeted_post_ids) >= retweeted_post_ids_count:
 	failed_checks += 1
 
 from pyspark.sql.types import BooleanType
@@ -59,24 +60,26 @@ tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).fil
 
 # check languages
 languages = tweets_pool.select('twitter_lang').distinct()
-assert languages.count() == 1
-if languages.count() != 1:
+languages_count = languages.count()
+assert languages_count == 1
+if languages_count != 1:
 	failed_checks += 1
-assert languages.first()['twitter_lang'] == 'en'
-if languages.first()['twitter_lang'] != 'en':
+language_retrieve = languages.first()
+assert language_retrieve['twitter_lang'] == 'en'
+if language_retrieve['twitter_lang'] != 'en':
 	failed_checks += 1
 
 # validity check for tweets_pool
 all_posts_ids = post_ids.collect()
 validity_1 = udf(lambda x: x not in all_posts_ids, BooleanType())
 validity_2 = udf(lambda x: x not in keep_retweeted_post_ids, BooleanType())
-invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'post').where(validity_1(col('id')))
-assert invalid_tweets.count() == 0
-if invalid_tweets.count() != 0:
+invalid_tweets_count = tweets_pool.where(tweets_pool['verb'] == 'post').where(validity_1(col('id'))).count()
+assert invalid_tweets_count == 0
+if invalid_tweets_count != 0:
 	failed_checks += 1
-invalid_tweets = tweets_pool.where(tweets_pool['verb'] == 'share').where(validity_2(col('object.id')))
-assert invalid_tweets.count() == 0
-if invalid_tweets.count() != 0:
+invalid_tweets_count = tweets_pool.where(tweets_pool['verb'] == 'share').where(validity_2(col('object.id'))).count()
+assert invalid_tweets_count == 0
+if invalid_tweets_count != 0:
 	failed_checks += 1
 
 tweets_pool_count = tweets_pool.count()
