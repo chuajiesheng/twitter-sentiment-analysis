@@ -86,16 +86,31 @@ p = np.percentile(lengths_np, 20)
 final_tweets_pool = tweets_pool.filter(length('body') >= p)
 final_tweets_pool_count = final_tweets_pool.count()
 assert (float(final_tweets_pool_count) / tweets_pool_count) > 0.8
+if (float(final_tweets_pool_count) / tweets_pool_count) <= 0.8:
+	failed_checks += 1
 
 sample_seed = 2016
 number_of_instructional_samples = 30
-sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
+sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
 sample_posts_count = len(sample_posts)
 print '{} sample posts'.format(sample_posts_count)
 
-sample_posts_file = "./output/sample_posts.json"
+sample_posts_file = "./step_1/output/sample_posts.json"
 sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
 with open(sample_posts_file, 'w') as f:
 	for post in sample_posts_jsons:
+		f.write(post)
+		f.write('\n')
+
+dev_seed = 20160717
+number_of_dev_samples = 3000
+dev_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_dev_samples, dev_seed)
+dev_posts_count = len(dev_posts)
+print '{} dev posts'.format(dev_posts_count)
+
+dev_posts_file = "./step_1/output/dev_posts.json"
+dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
+with open(dev_posts_file, 'w') as f:
+	for post in dev_posts_jsons:
 		f.write(post)
 		f.write('\n')
