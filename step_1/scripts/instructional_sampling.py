@@ -1,7 +1,17 @@
 import sys
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
+from pyspark.sql.types import *
 import numpy as np
+
+
+def log(message):
+    log_file = 'instructional_sampling.log'
+    with open(log_file, 'a') as f:
+        f.write(message)
+        f.flash()
+        f.close()
+    print message
 
 # coding=utf-8
 reload(sys)
@@ -32,7 +42,7 @@ all_posts_count = all_posts.count()
 assert all_posts_count == 1570398
 if all_posts_count != 1570398:
     failed_checks += 1
-print '{} posts'.format(all_posts_count)
+log('{} posts'.format(all_posts_count))
 
 all_shares = datasets.where(datasets['verb'] == 'share')
 all_shares_count = all_shares.count()
@@ -40,7 +50,7 @@ all_shares_count = all_shares.count()
 assert all_shares_count == 1112590
 if all_shares_count != 1112590:
     failed_checks += 1
-print '{} shares'.format(all_shares_count)
+log('{} shares'.format(all_shares_count))
 
 assert all_tweets_count[0][0] == all_posts_count + all_shares_count
 if all_tweets_count[0][0] != all_posts_count + all_shares_count:
@@ -54,7 +64,6 @@ assert len(keep_retweeted_post_ids) < retweeted_post_ids_count
 if len(keep_retweeted_post_ids) >= retweeted_post_ids_count:
     failed_checks += 1
 
-from pyspark.sql.types import BooleanType
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
 tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).filter("twitter_lang = 'en'")
 
@@ -96,7 +105,7 @@ sample_seed = 2016
 number_of_instructional_samples = 30
 sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
 sample_posts_count = len(sample_posts)
-print '{} sample posts'.format(sample_posts_count)
+log('{} sample posts'.format(sample_posts_count))
 
 sample_posts_file = "./step_1/output/sample_posts.json"
 sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
@@ -109,7 +118,7 @@ dev_seed = 20160717
 number_of_dev_samples = 3000
 dev_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_dev_samples, dev_seed)
 dev_posts_count = len(dev_posts)
-print '{} dev posts'.format(dev_posts_count)
+log('{} dev posts'.format(dev_posts_count))
 
 dev_posts_file = "./step_1/output/dev_posts.json"
 dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
