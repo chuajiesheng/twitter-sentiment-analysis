@@ -76,6 +76,7 @@ if len(keep_retweeted_post_ids) >= retweeted_post_ids_count:
 
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
 tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).filter("twitter_lang = 'en'")
+tweets_pool.cache()
 log('# Completed constructing tweets pool')
 
 # check languages
@@ -115,7 +116,11 @@ log('{} tweets in tweets pool'.format(tweets_pool_count))
 tweets_pool_str_lengths = tweets_pool.select(length('body').alias('length')).rdd.map(lambda x: x.length).collect()
 lengths_np = np.array(tweets_pool_str_lengths)
 p = np.percentile(lengths_np, 20)
+
 final_tweets_pool = tweets_pool.filter(length('body') >= p)
+final_tweets_pool.cache()
+tweets_pool.unpersist()
+
 final_tweets_pool_count = final_tweets_pool.count()
 percentage_kept = float(final_tweets_pool_count) / tweets_pool_count
 assert percentage_kept > 0.8
