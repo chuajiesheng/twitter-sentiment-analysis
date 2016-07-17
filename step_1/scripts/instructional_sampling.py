@@ -25,6 +25,7 @@ failed_checks = 0
 
 directory = "tweets"
 datasets = sqlContext.read.json(directory)
+log('# Completed reading JSON files')
 
 file_count = datasets.where(datasets['verb'].isNull()).count()
 # expecting 21888
@@ -60,6 +61,7 @@ assert all_tweets_count[0][0] == all_posts_count + all_shares_count
 if all_tweets_count[0][0] != all_posts_count + all_shares_count:
     failed_checks += 1
     log('[error] all_tweets_count = {}'.format(all_tweets_count[0][0]))
+log('# Completed validating tweets count')
 
 retweeted_post_ids = all_shares.select(all_shares['object.id'].alias('id')).rdd.map(lambda x: x.id).distinct()
 post_ids = all_posts.select('id').rdd.map(lambda x: x.id).distinct()
@@ -74,6 +76,7 @@ if len(keep_retweeted_post_ids) >= retweeted_post_ids_count:
 
 exist_ = udf(lambda x: x in keep_retweeted_post_ids, BooleanType())
 tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).filter("twitter_lang = 'en'")
+log('# Completed constructing tweets pool')
 
 # check languages
 languages = tweets_pool.select('twitter_lang').distinct()
@@ -88,6 +91,7 @@ assert language_retrieve['twitter_lang'] == 'en'
 if language_retrieve['twitter_lang'] != 'en':
     failed_checks += 1
     log('[error] language_retrieve = {}'.format(language_retrieve['twitter_lang']))
+log('# Completed validating language variety')
 
 # validity check for tweets_pool
 all_posts_ids = post_ids.collect()
@@ -104,8 +108,10 @@ assert invalid_tweets_count == 0
 if invalid_tweets_count != 0:
     failed_checks += 1
     log('[error] invalid_tweets_count = {}'.format(invalid_tweets_count ))
+log('# Completed checking duplicated tweets')
 
 tweets_pool_count = tweets_pool.count()
+log('{} tweets in tweets pool'.format(tweets_pool_count))
 tweets_pool_str_lengths = tweets_pool.select(length('body').alias('length')).rdd.map(lambda x: x.length).collect()
 lengths_np = np.array(tweets_pool_str_lengths)
 p = np.percentile(lengths_np, 20)
@@ -116,6 +122,7 @@ assert percentage_kept > 0.8
 if percentage_kept <= 0.8:
     failed_checks += 1
     log('[error] percentage_kept = {}'.format(percentage_kept))
+log('# Completed sampling top 80% of tweets by body length')
 
 sample_seed = 2016
 number_of_instructional_samples = 30
@@ -130,6 +137,7 @@ with open(sample_posts_file, 'w') as f:
     for post in sample_posts_jsons:
         f.write(post)
         f.write('\n')
+log('# Completed exporting sample tweets')
 
 dev_seed = 20160717
 number_of_dev_samples = 3000
@@ -144,3 +152,4 @@ with open(dev_posts_file, 'w') as f:
     for post in dev_posts_jsons:
         f.write(post)
         f.write('\n')
+log('# Completed exporting dev tweets')
