@@ -9,7 +9,7 @@ def log(message):
     log_file = 'instructional_sampling.log'
     with open(log_file, 'a') as f:
         f.write(message)
-        f.flash()
+        f.flush()
         f.close()
     print message
 
@@ -22,7 +22,7 @@ sqlContext = SQLContext(sc)
 
 failed_checks = 0
 
-directory = "/Volumes/JS'S FIT/gnip-json"
+directory = "tweets"
 datasets = sqlContext.read.json(directory)
 
 file_count = datasets.where(datasets['verb'].isNull()).count()
