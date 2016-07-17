@@ -9,6 +9,7 @@ def log(message):
     log_file = 'instructional_sampling.log'
     with open(log_file, 'a') as f:
         f.write(message)
+        f.write('\n')
         f.flush()
         f.close()
     print message
