@@ -122,8 +122,9 @@ sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lamb
 sample_posts_count = len(sample_posts)
 log('{} sample posts'.format(sample_posts_count))
 
-sample_posts_file = "./step_1/output/sample_posts.json"
+sample_posts_file = "sample_posts.json"
 sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
+log('Exporting sample post to {}'.format(sample_posts_file))
 with open(sample_posts_file, 'w') as f:
     for post in sample_posts_jsons:
         f.write(post)
@@ -135,8 +136,9 @@ dev_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda 
 dev_posts_count = len(dev_posts)
 log('{} dev posts'.format(dev_posts_count))
 
-dev_posts_file = "./step_1/output/dev_posts.json"
+dev_posts_file = "dev_posts.json"
 dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
+log('Exporting dev post to {}'.format(dev_posts_file))
 with open(dev_posts_file, 'w') as f:
     for post in dev_posts_jsons:
         f.write(post)
