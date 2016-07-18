@@ -21,7 +21,7 @@ def csv(filename, jsons):
         for tweet in jsons:
             t = json.loads(tweet)
             body = t.body().replace('\n', ' ').replace('\r', '').replace('"', '""')
-            print '{},{},{},"{}"'.format(t.id(), t.verb(), t.timestamp(), body)
+            f.write('{},{},{},"{}"\n'.format(t.id(), t.verb(), t.timestamp(), body))
 
 
 # coding=utf-8
