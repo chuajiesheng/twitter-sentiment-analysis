@@ -1,4 +1,5 @@
 import sys
+import json
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
@@ -13,6 +14,15 @@ def log(message):
         f.flush()
         f.close()
     print message
+
+
+def csv(filename, jsons):
+    with open(filename, 'w') as f:
+        for tweet in jsons:
+            t = json.loads(tweet)
+            body = t.body().replace('\n', ' ').replace('\r', '').replace('"', '""')
+            print '{},{},{},"{}"'.format(t.id(), t.verb(), t.timestamp(), body)
+
 
 # coding=utf-8
 reload(sys)
@@ -130,7 +140,7 @@ if percentage_kept <= 0.8:
 log('# Completed sampling top 80% of tweets by body length')
 
 sample_seed = 2016
-number_of_instructional_samples = 30
+number_of_instructional_samples = 200
 sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
 sample_posts_count = len(sample_posts)
 log('{} sample posts'.format(sample_posts_count))
@@ -142,6 +152,7 @@ with open(sample_posts_file, 'w') as f:
     for post in sample_posts_jsons:
         f.write(post)
         f.write('\n')
+csv('sample_posts.csv', sample_posts_jsons)
 log('# Completed exporting sample tweets')
 
 dev_seed = 20160717
@@ -150,6 +161,7 @@ dev_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda 
 dev_posts_count = len(dev_posts)
 log('{} dev posts'.format(dev_posts_count))
 
+
 dev_posts_file = "dev_posts.json"
 dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
 log('Exporting dev post to {}'.format(dev_posts_file))
@@ -157,4 +169,5 @@ with open(dev_posts_file, 'w') as f:
     for post in dev_posts_jsons:
         f.write(post)
         f.write('\n')
+csv('dev_posts.csv', dev_posts)
 log('# Completed exporting dev tweets')

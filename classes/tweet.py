@@ -3,6 +3,9 @@ class Tweet:
     def __init__(self, json_object):
         self.data = json_object
 
+    def id(self):
+        return self.data['id']
+
     def timestamp(self):
         return self.data['postedTime']
 
