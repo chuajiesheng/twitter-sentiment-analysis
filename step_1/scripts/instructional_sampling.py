@@ -20,8 +20,8 @@ def csv(filename, jsons):
     with open(filename, 'w') as f:
         for tweet in jsons:
             t = json.loads(tweet)
-            body = t.body().replace('\n', ' ').replace('\r', '').replace('"', '""')
-            f.write('{},{},{},"{}"\n'.format(t.id(), t.verb(), t.timestamp(), body))
+            body = t['body'].replace('\n', ' ').replace('\r', '').replace('"', '""')
+            f.write('{},{},{},"{}"\n'.format(t['id'], t['verb'], t['postedTime'], body))
 
 
 # coding=utf-8
