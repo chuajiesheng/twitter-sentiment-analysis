@@ -44,19 +44,19 @@ def to_csv(name, jsons):
             f.write('"{}",{},{},"{}"\n'.format(t['id'], t['verb'], t['postedTime'], body))
 
 
-# coding=utf-8
+# Make sure Python uses UTF-8 as tweets contains emoticon and unicode
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-# sc is an existing SparkContext.
+# Use SQLContext for better support
 sqlContext = SQLContext(sc)
 
-failed_checks = 0
-
+# Read GNIP's JSON file
 directory = "tweets"
 datasets = sqlContext.read.json(directory)
 log('# Completed reading JSON files')
 
+# Check checksum count
 file_count = datasets.where(datasets['verb'].isNull()).count()
 # expecting 21888
 assert file_count == 21888
@@ -69,6 +69,7 @@ info_dataset.registerTempTable('info')
 all_tweets_count = info_dataset.select('info.activity_count').groupBy().sum('activity_count').collect()
 # expecting 2682988
 
+# Check post count
 all_posts = datasets.where(datasets['verb'] == 'post')
 all_posts_count = all_posts.count()
 # expecting 1570398
@@ -78,6 +79,7 @@ if all_posts_count != 1570398:
     log('[error] all_posts_count = {}'.format(all_posts_count))
 log('{} posts'.format(all_posts_count))
 
+# Check share count
 all_shares = datasets.where(datasets['verb'] == 'share')
 all_shares_count = all_shares.count()
 # expecting 1112590
@@ -109,7 +111,7 @@ tweets_pool = all_posts.unionAll(all_shares.where(exist_(col('object.id')))).fil
 tweets_pool.cache()
 log('# Completed constructing tweets pool')
 
-# check languages
+# Check language of tweets
 languages = tweets_pool.select('twitter_lang').distinct()
 languages_count = languages.count()
 assert languages_count == 1
@@ -159,6 +161,10 @@ if percentage_kept <= 0.8:
     log('[error] percentage_kept = {}'.format(percentage_kept))
 log('# Completed sampling top 80% of tweets by body length')
 
+# Sampling
+final_tweets_ids = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
+
+# Sample tweets
 sample_seed = 2016
 number_of_instructional_samples = 200
 sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_instructional_samples, sample_seed)
