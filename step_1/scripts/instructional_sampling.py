@@ -1,9 +1,20 @@
 import sys
 import json
+from operator import *
+
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+
 import numpy as np
+
+
+def expect(name, var, expected, op=eq):
+    if op(var, expected):
+        log('[error] {} = {}'.format(name, expected))
+        raise Exception(name)
+    else:
+        log('[checkpoint] {} = {}'.format(expected))
 
 
 def log(message):
