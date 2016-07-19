@@ -27,7 +27,16 @@ def log(message):
     print message
 
 
-def csv(filename, jsons):
+def to_json(name, jsons):
+    filename = '{}.json'.format(name)
+    with open(filename, 'w') as f:
+        for j in jsons:
+            f.write(j)
+            f.write('\n')
+
+
+def to_csv(name, jsons):
+    filename = '{}.csv'.format(name)
     with open(filename, 'w') as f:
         for tweet in jsons:
             t = json.loads(tweet)
@@ -156,29 +165,23 @@ sample_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lamb
 sample_posts_count = len(sample_posts)
 log('{} sample posts'.format(sample_posts_count))
 
-sample_posts_file = "sample_posts.json"
+sample_posts_file = "sample_posts"
 sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
 log('Exporting sample post to {}'.format(sample_posts_file))
-with open(sample_posts_file, 'w') as f:
-    for post in sample_posts_jsons:
-        f.write(post)
-        f.write('\n')
-csv('sample_posts.csv', sample_posts_jsons)
+to_json(sample_posts_file, sample_posts_jsons)
+to_csv(sample_posts_file, sample_posts_jsons)
 log('# Completed exporting sample tweets')
 
+# Development tweets
 dev_seed = 20160717
 number_of_dev_samples = 3000
 dev_posts = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).takeSample(False, number_of_dev_samples, dev_seed)
 dev_posts_count = len(dev_posts)
 log('{} dev posts'.format(dev_posts_count))
 
-
-dev_posts_file = "dev_posts.json"
+dev_posts_file = "dev_posts"
 dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
+to_json(dev_posts_file, dev_posts_jsons)
+to_csv(dev_posts_file, dev_posts_jsons)
 log('Exporting dev post to {}'.format(dev_posts_file))
-with open(dev_posts_file, 'w') as f:
-    for post in dev_posts_jsons:
-        f.write(post)
-        f.write('\n')
-csv('dev_posts.csv', dev_posts_jsons)
 log('# Completed exporting dev tweets')
