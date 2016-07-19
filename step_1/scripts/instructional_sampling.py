@@ -21,7 +21,7 @@ def csv(filename, jsons):
         for tweet in jsons:
             t = json.loads(tweet)
             body = t['body'].replace('\n', ' ').replace('\r', '').replace('"', '""')
-            f.write('{},{},{},"{}"\n'.format(t['id'], t['verb'], t['postedTime'], body))
+            f.write('"{}",{},{},"{}"\n'.format(t['id'], t['verb'], t['postedTime'], body))
 
 
 # coding=utf-8
@@ -169,5 +169,5 @@ with open(dev_posts_file, 'w') as f:
     for post in dev_posts_jsons:
         f.write(post)
         f.write('\n')
-csv('dev_posts.csv', dev_posts)
+csv('dev_posts.csv', dev_posts_jsons)
 log('# Completed exporting dev tweets')
