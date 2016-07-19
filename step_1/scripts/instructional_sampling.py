@@ -152,3 +152,18 @@ to_json(dev_posts_file, dev_posts_jsons)
 to_csv(dev_posts_file, dev_posts_jsons)
 log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
+
+# Inter-reliability test tweets
+kappa_dev_seed = 0223
+number_of_kappa_samples = 300
+kappa_posts = sc.parallelize(dev_posts).takeSample(False, number_of_kappa_samples, kappa_dev_seed)
+kappa_posts_count = len(kappa_posts)
+expect('kappa_posts_count', kappa_posts_count, number_of_kappa_samples)
+expect('kappa_posts_proper_subset', set(kappa_posts), set(dev_posts), op=set.issubset)
+
+kappa_posts_file = "kappa_posts"
+kappa_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(kappa_posts)].toJSON().collect()
+to_json(kappa_posts_file, kappa_posts_jsons)
+to_csv(kappa_posts_file, kappa_posts_jsons)
+log('Exporting kappa post to {}'.format(kappa_posts_file))
+log('# Completed exporting kappa tweets')
