@@ -11,10 +11,10 @@ import numpy as np
 
 def expect(name, var, expected, op=eq):
     if op(var, expected):
+        log('[checkpoint] {} = {}'.format(name, expected))
+    else:
         log('[error] {} = {}'.format(name, expected))
         raise Exception(name)
-    else:
-        log('[checkpoint] {} = {}'.format(expected))
 
 
 def log(message):
@@ -94,9 +94,10 @@ expect('all_shares_wo_chipotle', all_shares_wo_chipotle.count(), all_shares_coun
 tweets_pool = all_posts_wo_chipotle.unionAll(all_shares_wo_chipotle).filter("twitter_lang = 'en'")
 tweets_pool.cache()
 tweets_pool_count = tweets_pool.count()
+# Adding all post to all share will be greater than tweet pool because of non-English tweet
 expected_tweets_pool_count = all_posts_count - all_posts_w_chipotle_count + \
                              all_shares_count - all_shares_w_chipotle_count
-expect('tweets_pool_count', tweets_pool_count, expected_tweets_pool_count)
+expect('tweets_pool_count', tweets_pool_count, expected_tweets_pool_count, op=lt)
 log('# Completed constructing tweets pool')
 
 # Check language of tweets
