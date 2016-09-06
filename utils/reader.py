@@ -28,6 +28,10 @@ class Reader:
                 json_object = json.loads(line)
                 if Reader.is_tweet(json_object):
                     tweets.append(Tweet(json_object))
+                else:
+                    # this is a checksum line
+                    activity_count = int(json_object['info']['activity_count'])
+                    assert len(tweets) == activity_count
 
         return tweets
 
