@@ -1,29 +1,36 @@
-import os.path, gzip, shutil
+import os, os.path
 
 directory = './step_0/input'
 num_of_files = len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))])
 
-output_file = "./step_0/output/tweets.json"
+output_file_template = "./step_0/output/tweets_{}.json"
+current_file = 0
+file_per_set = 10000
+current_output_file = output_file_template.format(current_file)
 
-with open(output_file, 'w') as f:
-    for x in range(0, num_of_files):
-        filename = '{}/{}.json'.format(directory, x)
-        with open(filename, 'r') as f2:
-            print 'Reading {}'.format(filename)
-            for line in f2:
-                if len(line.strip()) < 1:
-                    continue
-                f.write(line.strip())
-                f.write('\n')
-                f.flush()
+f = open(current_output_file, 'w')
+start = current_file * file_per_set
+end = start + file_per_set
 
-print 'Completed concat'
+for x in range(0, num_of_files):
+    if x == end:
+        f.close()
 
-src = output_file
-dest = output_file + '.gz'
-print 'Gzip {} to {}'.format(src, dest)
+        current_file += 1
+        current_output_file = output_file_template.format(current_file)
+        f = open(current_output_file, 'w')
 
-with open(output_file, 'rb') as f_in, gzip.open(dest, 'wb') as f_out:
-    shutil.copyfileobj(f_in, f_out)
+        start = current_file * file_per_set
+        end = start + file_per_set
 
-print 'Completed gzip'
+    filename = '{}/{}.json'.format(directory, x)
+    with open(filename, 'r') as f2:
+        print 'Reading {}'.format(filename)
+        for line in f2:
+            if len(line.strip()) < 1:
+                continue
+            f.write(line.strip())
+            f.write('\n')
+            f.flush()
+
+f.close()

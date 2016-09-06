@@ -52,8 +52,8 @@ sys.setdefaultencoding('utf-8')
 sqlContext = SQLContext(sc)
 
 # Read GNIP's JSON file
-filename = "./step_1/input/tweets.json.gz"
-datasets = sqlContext.read.json(filename)
+directory = "tweets"
+datasets = sqlContext.read.json(directory)
 log('# Completed reading JSON files')
 
 # Check checksum count
