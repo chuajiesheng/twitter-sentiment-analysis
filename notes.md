@@ -43,6 +43,11 @@ hadoop fs -mkdir tweets
 hdfs dfs -cp s3://chipotle-crisis-sg/tweets_0.json tweets/tweet_0.json
 hdfs dfs -cp s3://chipotle-crisis-sg/tweets_1.json tweets/tweet_1.json
 hdfs dfs -cp s3://chipotle-crisis-sg/tweets_2.json tweets/tweet_2.json
+
+hdfs dfs -checksum tweets/tweet_0.json
+hdfs dfs -checksum tweets/tweet_1.json
+hdfs dfs -checksum tweets/tweet_2.json
+
 hadoop fs -ls tweets
 ```
 
