@@ -42,6 +42,13 @@ def to_csv(name, jsons):
             t = json.loads(tweet)
             body = t['body'].replace('\n', ' ').replace('\r', '').replace('"', '""')
             f.write('"{}",{},{},"{}"\n'.format(t['id'], t['verb'], t['postedTime'], body))
+            
+def sample(rdd, size, seed):
+    items = rdd.collect()
+    rand = np.random.RandomState(seed)
+    sampled = rand.choice(items, size=size, replace=False)
+    expect('sampled', len(set(sampled)), size)
+    return sampled.tolist()
 
 
 # Make sure Python uses UTF-8 as tweets contains emoticon and unicode
@@ -125,24 +132,10 @@ log('# Completed sampling top 80% of tweets by body length')
 # Sampling
 final_tweets_ids = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
 
-# Sample tweets
-sample_seed = 2016
-number_of_instructional_samples = 30
-sample_posts = final_tweets_ids.takeSample(False, number_of_instructional_samples, sample_seed)
-sample_posts_count = len(sample_posts)
-expect('sample_posts_count', sample_posts_count, number_of_instructional_samples)
-
-sample_posts_file = "sample_posts"
-sample_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(sample_posts)].toJSON().collect()
-log('Exporting sample post to {}'.format(sample_posts_file))
-to_json(sample_posts_file, sample_posts_jsons)
-to_csv(sample_posts_file, sample_posts_jsons)
-log('# Completed exporting sample tweets')
-
 # Development tweets
-dev_seed = 20160717
+dev_seed = 19092016
 number_of_dev_samples = 3000
-dev_posts = final_tweets_ids.takeSample(False, number_of_dev_samples, dev_seed)
+dev_posts = sample(final_tweets_ids, number_of_dev_samples, dev_seed)
 dev_posts_count = len(dev_posts)
 expect('dev_posts_count', dev_posts_count, number_of_dev_samples)
 
@@ -154,9 +147,9 @@ log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
 
 # Inter-reliability test tweets
-kappa_dev_seed = 0223
+kappa_dev_seed = 126
 number_of_kappa_samples = 300
-kappa_posts = sc.parallelize(dev_posts).takeSample(False, number_of_kappa_samples, kappa_dev_seed)
+kappa_posts = sample(sc.parallelize(dev_posts), number_of_kappa_samples, kappa_dev_seed)
 kappa_posts_count = len(kappa_posts)
 expect('kappa_posts_count', kappa_posts_count, number_of_kappa_samples)
 expect('kappa_posts_proper_subset', set(kappa_posts), set(dev_posts), op=set.issubset)
