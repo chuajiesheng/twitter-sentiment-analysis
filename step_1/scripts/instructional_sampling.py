@@ -133,7 +133,7 @@ log('# Completed sampling top 80% of tweets by body length')
 final_tweets_ids = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
 
 # Development tweets
-dev_seed = 19092016
+dev_seed = 24092016
 number_of_dev_samples = 3000
 dev_posts = sample(final_tweets_ids, number_of_dev_samples, dev_seed)
 dev_posts_count = len(dev_posts)
@@ -147,7 +147,7 @@ log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
 
 # Inter-reliability test tweets
-kappa_dev_seed = 126
+kappa_dev_seed = 5206
 number_of_kappa_samples = 300
 kappa_posts = sample(sc.parallelize(dev_posts), number_of_kappa_samples, kappa_dev_seed)
 kappa_posts_count = len(kappa_posts)
