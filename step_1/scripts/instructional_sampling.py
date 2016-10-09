@@ -85,16 +85,26 @@ expect('all_tweets_count', all_tweets_count, 2682988)
 expect('all_tweets_count', all_tweets_count, all_posts_count + all_shares_count)
 log('# Completed validating tweets count')
 
-# Remove post authored by @ChipotleTweet
-# GET https://api.twitter.com/1.1/users/show.json?screen_name=ChipotleTweets to get id
+# Remove post authored by @ChipotleTweet and news agencies
+users_to_remove = ['id:twitter.com:759251', 'id:twitter.com:91478624', 'id:twitter.com:28785486',
+                   'id:twitter.com:1652541', 'id:twitter.com:51241574', 'id:twitter.com:807095',
+                   'id:twitter.com:34713362', 'id:twitter.com:3090733766', 'id:twitter.com:1367531',
+                   'id:twitter.com:14293310', 'id:twitter.com:3108351', 'id:twitter.com:14173315',
+                   'id:twitter.com:292777349', 'id:twitter.com:428333', 'id:twitter.com:624413',
+                   'id:twitter.com:20562637', 'id:twitter.com:13918492', 'id:twitter.com:16184358',
+                   'id:twitter.com:625697849', 'id:twitter.com:2467791', 'id:twitter.com:9763482',
+                   'id:twitter.com:14511951', 'id:twitter.com:6017542', 'id:twitter.com:26574283',
+                   'id:twitter.com:115754870']
+
+
 chipotle_tweet = 'id:twitter.com:141341662'
-all_posts_wo_chipotle = all_posts.filter("actor.id != '{}'".format(chipotle_tweet))
-all_posts_w_chipotle_count = all_posts.filter("actor.id = '{}'".format(chipotle_tweet)).count()
+all_posts_wo_chipotle = all_posts.filter(lambda t: t.actor.id not in users_to_remove)
+all_posts_w_chipotle_count = all_posts.filter(lambda t: t.actor.id in users_to_remove).count()
 expect('all_posts_wo_chipotle', all_posts_wo_chipotle.count(), all_posts_count - all_posts_w_chipotle_count)
 
-# Remove share retweet of tweet by @ChipotleTweet
-all_shares_wo_chipotle = all_shares.filter("object.actor.id != '{}'".format(chipotle_tweet))
-all_shares_w_chipotle_count = all_shares.filter("object.actor.id = '{}'".format(chipotle_tweet)).count()
+# Remove share retweet of tweet by @ChipotleTweet and news agencies
+all_shares_wo_chipotle = all_shares.filter(lambda t: t.object.actor.id not in users_to_remove)
+all_shares_w_chipotle_count = all_shares.filter(lambda t: t.object.actor.id in users_to_remove).count()
 expect('all_shares_wo_chipotle', all_shares_wo_chipotle.count(), all_shares_count - all_shares_w_chipotle_count)
 
 # Generate tweets pool with only English tweet
