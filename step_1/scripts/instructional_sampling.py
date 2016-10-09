@@ -99,12 +99,12 @@ users_to_remove = [chipotle_tweet, 'id:twitter.com:759251', 'id:twitter.com:9147
 
 all_posts_wo_specific_users = all_posts.where(~ col('actor.id').isin(users_to_remove))
 all_posts_w_specific_users = all_posts.where(col('actor.id').isin(users_to_remove)).count()
-expect('all_posts_wo_chipotle', all_posts_wo_specific_users.count(), all_posts_count - all_posts_w_specific_users)
+expect('all_posts_wo_specific_users', all_posts_wo_specific_users.count(), all_posts_count - all_posts_w_specific_users)
 
 # Remove share retweet of tweet by @ChipotleTweet and news agencies
 all_shares_wo_specific_users = all_shares.where(~ col('object.actor.id').isin(users_to_remove))
 all_shares_w_specific_users = all_shares.where(col('object.actor.id').isin(users_to_remove)).count()
-expect('all_shares_wo_chipotle', all_shares_wo_specific_users.count(), all_shares_count - all_shares_w_specific_users)
+expect('all_shares_wo_specific_users', all_shares_wo_specific_users.count(), all_shares_count - all_shares_w_specific_users)
 
 # Generate tweets pool with only English tweet
 tweets_pool = all_posts_wo_specific_users.unionAll(all_shares_wo_specific_users).filter("twitter_lang = 'en'")
