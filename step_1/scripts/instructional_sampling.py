@@ -97,24 +97,22 @@ users_to_remove = [chipotle_tweet, 'id:twitter.com:759251', 'id:twitter.com:9147
                    'id:twitter.com:14511951', 'id:twitter.com:6017542', 'id:twitter.com:26574283',
                    'id:twitter.com:115754870']
 
-
-chipotle_tweet = 'id:twitter.com:141341662'
-all_posts_wo_chipotle = all_posts.filter(lambda t: t.actor.id not in users_to_remove)
-all_posts_w_chipotle_count = all_posts.filter(lambda t: t.actor.id in users_to_remove).count()
-expect('all_posts_wo_chipotle', all_posts_wo_chipotle.count(), all_posts_count - all_posts_w_chipotle_count)
+all_posts_wo_specific_users = all_posts.where(~ col('actor.id').isin(users_to_remove))
+all_posts_w_specific_users = all_posts.where(col('actor.id').isin(users_to_remove)).count()
+expect('all_posts_wo_chipotle', all_posts_wo_specific_users.count(), all_posts_count - all_posts_w_specific_users)
 
 # Remove share retweet of tweet by @ChipotleTweet and news agencies
-all_shares_wo_chipotle = all_shares.filter(lambda t: t.object.actor.id not in users_to_remove)
-all_shares_w_chipotle_count = all_shares.filter(lambda t: t.object.actor.id in users_to_remove).count()
-expect('all_shares_wo_chipotle', all_shares_wo_chipotle.count(), all_shares_count - all_shares_w_chipotle_count)
+all_shares_wo_specific_users = all_shares.where(~ col('object.actor.id').isin(users_to_remove))
+all_shares_w_specific_users = all_shares.where(col('object.actor.id').isin(users_to_remove)).count()
+expect('all_shares_wo_chipotle', all_shares_wo_specific_users.count(), all_shares_count - all_shares_w_specific_users)
 
 # Generate tweets pool with only English tweet
-tweets_pool = all_posts_wo_chipotle.unionAll(all_shares_wo_chipotle).filter("twitter_lang = 'en'")
+tweets_pool = all_posts_wo_specific_users.unionAll(all_shares_wo_specific_users).filter("twitter_lang = 'en'")
 tweets_pool.cache()
 tweets_pool_count = tweets_pool.count()
 # Adding all post to all share will be greater than tweet pool because of non-English tweet
-expected_tweets_pool_count = all_posts_count - all_posts_w_chipotle_count + \
-                             all_shares_count - all_shares_w_chipotle_count
+expected_tweets_pool_count = all_posts_count - all_posts_w_specific_users + \
+                             all_shares_count - all_shares_w_specific_users
 expect('tweets_pool_count', tweets_pool_count, expected_tweets_pool_count, op=lt)
 log('# Completed constructing tweets pool')
 
