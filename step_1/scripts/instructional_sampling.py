@@ -86,7 +86,8 @@ expect('all_tweets_count', all_tweets_count, all_posts_count + all_shares_count)
 log('# Completed validating tweets count')
 
 # Remove post authored by @ChipotleTweet and news agencies
-users_to_remove = ['id:twitter.com:759251', 'id:twitter.com:91478624', 'id:twitter.com:28785486',
+chipotle_tweet = 'id:twitter.com:141341662'
+users_to_remove = [chipotle_tweet, 'id:twitter.com:759251', 'id:twitter.com:91478624', 'id:twitter.com:28785486',
                    'id:twitter.com:1652541', 'id:twitter.com:51241574', 'id:twitter.com:807095',
                    'id:twitter.com:34713362', 'id:twitter.com:3090733766', 'id:twitter.com:1367531',
                    'id:twitter.com:14293310', 'id:twitter.com:3108351', 'id:twitter.com:14173315',
