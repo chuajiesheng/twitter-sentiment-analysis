@@ -20,7 +20,7 @@ def expect(name, var, expected, op=eq):
 
 
 def log(message):
-    log_file = 'instructional_sampling.log'
+    log_file = 'sample_subjectivity_tweets.log'
     with open(log_file, 'a') as f:
         f.write(message)
         f.write('\n')
