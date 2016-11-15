@@ -56,5 +56,50 @@ class Clues:
             'total_priorpolarity': total_priorpolarity
         }
 
+    def calculate_related_words(self, sentence):
+        related_words = 0
+
+        for w in sentence.split(' '):
+            if w not in self.lexicons.keys():
+                continue
+
+            related_words += 1
+
+        return related_words
+
+    def calculate_subjectivity(self, sentence):
+        total_subjectivity = 0
+
+        for w in sentence.split(' '):
+            if w not in self.lexicons.keys():
+                continue
+            total_subjectivity += self.TYPE[self.lexicons[w]['type']]
+
+        return total_subjectivity
+
+    def calculate_priorpolarity(self, sentence):
+        total_priorpolarity = 0
+
+        for w in sentence.split(' '):
+            if w not in self.lexicons.keys():
+                continue
+
+            total_priorpolarity += self.PRIORPOLARITY[self.lexicons[w]['priorpolarity']]
+
+        return total_priorpolarity
+
+    def calculate_relevant(self, sentence):
+        total_subjectivity = 0
+        total_priorpolarity = 0
+
+        for w in sentence.split(' '):
+            if w not in self.lexicons.keys():
+                continue
+
+            total_subjectivity += self.TYPE[self.lexicons[w]['type']]
+            total_priorpolarity += self.PRIORPOLARITY[self.lexicons[w]['priorpolarity']]
+
+        return total_subjectivity * total_priorpolarity
+
 if __name__ == '__main__':
     c = Clues()
