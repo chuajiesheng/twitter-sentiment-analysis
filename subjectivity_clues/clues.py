@@ -89,17 +89,15 @@ class Clues:
         return total_priorpolarity
 
     def calculate_relevant(self, sentence):
-        total_subjectivity = 0
-        total_priorpolarity = 0
+        total_score = 0
 
         for w in sentence.split(' '):
             if w not in self.lexicons.keys():
                 continue
 
-            total_subjectivity += self.TYPE[self.lexicons[w]['type']]
-            total_priorpolarity += self.PRIORPOLARITY[self.lexicons[w]['priorpolarity']]
+            total_score += self.PRIORPOLARITY[self.lexicons[w]['priorpolarity']] * self.TYPE[self.lexicons[w]['type']]
 
-        return total_subjectivity * total_priorpolarity
+        return total_score
 
 if __name__ == '__main__':
     c = Clues()
