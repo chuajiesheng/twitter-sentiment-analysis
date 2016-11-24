@@ -159,11 +159,25 @@ to_csv(dev_posts_file, dev_posts_jsons)
 log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
 
+# Find distinct set of tweets (unique body text)
+post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
+post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
+
+share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
+unique_share_pool = share_pool.where(~ col('object.id').isin(post_pool_ids))
+expect('unique_share_pool', unique_share_pool.count(), 1000)
+log('# Completed finding unique share tweet')
+
+# Reconstruct tweet pool
+distinct_tweets_pool = post_pool.unionAll(unique_share_pool)
+expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1000)
+log('# Completed constructing distinct tweet pool')
+
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
-tweets_lexicon = final_tweets_pool.select(final_tweets_pool['id'], final_tweets_pool['body']).withColumn('score', udfBodyToRelevant('body'))
+tweets_lexicon = distinct_tweets_pool.select(distinct_tweets_pool['id'], distinct_tweets_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 
 # Exclude development tweets
 tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
