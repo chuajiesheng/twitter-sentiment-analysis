@@ -1,6 +1,7 @@
 import sys
 import json
 import hashlib
+import gc
 from operator import *
 
 from pyspark.sql import SQLContext
@@ -177,6 +178,9 @@ expect('dev_posts_file', sha(dev_posts_file, ext='csv'), '6acfd1f8d238bc5d25d97d
 log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
 
+del dev_posts_jsons
+gc.collect()
+
 # Find distinct set of tweets (unique body text)
 post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
 post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).collect()
@@ -192,8 +196,12 @@ log('# Completed finding unique share tweet')
 
 # Reconstruct tweet pool
 distinct_tweets_pool = post_pool.unionAll(unique_share_pool)
-distinct_tweets_pool.cache()
+
 final_tweets_pool.unpersist()
+del final_tweets_pool
+gc.collect()
+
+distinct_tweets_pool.cache()
 expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
 log('# Completed constructing distinct tweet pool')
 
