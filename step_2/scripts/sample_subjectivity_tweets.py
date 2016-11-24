@@ -187,11 +187,6 @@ log('# Completed constructing unsampled tweets')
 # Take top and bottom
 number_of_tweets_each = 1500
 positive_tweets = tweets_unsampled.orderBy(desc('score')).take(5000)
-new_positive_tweet_ids = []
-for t in positive_tweets:
-    # Remove https://twitter.com/chanelpuke/status/698607846410289154
-    if 'buy back my trust after the E. coli breakout with a free burrito then they were right' not in t['body'] or t['id'] == 'tag:search.twitter.com,2005:698607846410289154':
-        new_positive_tweet_ids.append(t['id'])
 
 positive_tweet_file = "positive_tweets"
 positive_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(new_positive_tweet_ids[:number_of_tweets_each])].toJSON().collect()
