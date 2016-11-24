@@ -167,7 +167,7 @@ expect('post_pool', post_pool.count(), 1124935)
 share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
 expect('share_pool', share_pool.count(), 846141)
 broadcast_post_ids = sc.broadcast(set(post_pool_ids))
-unique_share_pool = share_pool.where(~ col('object.id').isin(broadcast_post_ids.value))
+unique_share_pool = sc.parallelize(share_pool).where(~ col('object.id').isin(broadcast_post_ids.value)) # very long operation ~ 15mins
 expect('unique_share_pool', unique_share_pool.count(), 1000)
 log('# Completed finding unique share tweet')
 
