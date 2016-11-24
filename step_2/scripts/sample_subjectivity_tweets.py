@@ -170,6 +170,8 @@ log('# Completed finding unique share tweet')
 
 # Reconstruct tweet pool
 distinct_tweets_pool = post_pool.unionAll(unique_share_pool)
+distinct_tweets_pool.cache()
+final_tweets_pool.unpersist()
 expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1000)
 log('# Completed constructing distinct tweet pool')
 
