@@ -170,7 +170,8 @@ tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
 expect('tweets_unsampled', tweets_unsampled.count, len(final_tweets_ids) - number_of_dev_samples)
 log('# Completed constructing unsampled tweets')
 
-# Take 5000 top and bottom
+# Take top and bottom
+number_of_tweets_each = 1500
 positive_tweets = tweets_unsampled.orderBy(desc('score')).take(5000)
 new_positive_tweet_ids = []
 for t in positive_tweets:
@@ -179,7 +180,7 @@ for t in positive_tweets:
         new_positive_tweet_ids.append(t['id'])
 
 positive_tweet_file = "positive_tweets"
-positive_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(new_positive_tweet_ids)].toJSON().collect()
+positive_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(new_positive_tweet_ids[:number_of_tweets_each])].toJSON().collect()
 to_json(positive_tweet_file, positive_tweet_jsons)
 to_csv(positive_tweet_file, positive_tweet_jsons)
 log('Exporting positive tweets to {}'.format(positive_tweet_file))
@@ -189,7 +190,7 @@ negative_tweets = tweets_unsampled.orderBy(asc('score')).take(5000)
 negative_tweet_ids = [t['id'] for t in negative_tweets]
 
 negative_tweet_file = "negative_tweets"
-negative_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(negative_tweet_ids)].toJSON().collect()
+negative_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(negative_tweet_ids[:number_of_tweets_each])].toJSON().collect()
 to_json(negative_tweet_file, negative_tweet_jsons)
 to_csv(negative_tweet_file, negative_tweet_jsons)
 log('Exporting negative tweets to {}'.format(negative_tweet_file))
