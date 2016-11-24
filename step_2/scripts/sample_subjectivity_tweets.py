@@ -1,5 +1,6 @@
 import sys
 import json
+import hashlib
 from operator import *
 
 from pyspark.sql import SQLContext
@@ -52,6 +53,21 @@ def sample(rdd, size, seed):
     sampled = rand.choice(items, size=size, replace=False)
     expect('sampled', len(set(sampled)), size)
     return sampled.tolist()
+
+
+def sha(name, ext='json'):
+    BUF_SIZE = 65536
+    filename = '{}.{}'.format(name, ext)
+
+    sha1 = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest()
 
 
 # Make sure Python uses UTF-8 as tweets contains emoticon and unicode
@@ -156,6 +172,8 @@ dev_posts_file = "dev_posts"
 dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
 to_json(dev_posts_file, dev_posts_jsons)
 to_csv(dev_posts_file, dev_posts_jsons)
+expect('dev_posts_file', sha(dev_posts_file), '74447296831c8e3061fc0ee739f549c5b08b85a3')
+expect('dev_posts_file', sha(dev_posts_file, ext='csv'), '6acfd1f8d238bc5d25d97d2c9e6f6b177699389a')
 log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
 
