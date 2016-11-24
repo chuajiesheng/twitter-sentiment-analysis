@@ -158,6 +158,13 @@ dev_posts_count = len(dev_posts)
 expect('dev_posts_count', dev_posts_count, number_of_dev_samples)
 log('# Completed sampling dev tweets')
 
+dev_posts_file = "dev_posts"
+dev_posts_jsons = final_tweets_pool[final_tweets_pool['id'].isin(dev_posts)].toJSON().collect()
+to_json(dev_posts_file, dev_posts_jsons)
+to_csv(dev_posts_file, dev_posts_jsons)
+log('Exporting dev post to {}'.format(dev_posts_file))
+log('# Completed exporting dev tweets')
+
 # Exclude development tweets
 tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
 expect('tweets_unsampled', tweets_unsampled.count, len(final_tweets_ids) - number_of_dev_samples)
