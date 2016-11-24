@@ -141,12 +141,6 @@ percentage_kept = float(final_tweets_pool_count) / tweets_pool_count
 expect('percentage_kept', percentage_kept, 0.8, op=gt)
 log('# Completed sampling top 80% of tweets by body length')
 
-# Calculate subjectivity
-c = clues.Clues()
-broadcast_clues = sc.broadcast(c)
-udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
-tweets_lexicon = final_tweets_pool.select(final_tweets_pool['id'], final_tweets_pool['body']).withColumn('score', udfBodyToRelevant('body'))
-
 # Sampling
 final_tweets_ids = final_tweets_pool.select(final_tweets_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
 
@@ -164,6 +158,12 @@ to_json(dev_posts_file, dev_posts_jsons)
 to_csv(dev_posts_file, dev_posts_jsons)
 log('Exporting dev post to {}'.format(dev_posts_file))
 log('# Completed exporting dev tweets')
+
+# Calculate subjectivity
+c = clues.Clues()
+broadcast_clues = sc.broadcast(c)
+udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
+tweets_lexicon = final_tweets_pool.select(final_tweets_pool['id'], final_tweets_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 
 # Exclude development tweets
 tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
