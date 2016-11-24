@@ -161,7 +161,7 @@ log('# Completed exporting dev tweets')
 
 # Find distinct set of tweets (unique body text)
 post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
-post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
+post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).collect()
 
 share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
 unique_share_pool = share_pool.where(~ col('object.id').isin(post_pool_ids))
