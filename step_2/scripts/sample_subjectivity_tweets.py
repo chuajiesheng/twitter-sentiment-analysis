@@ -194,21 +194,21 @@ unique_share_pool = share_pool[share_pool['id'].isin(unique_share_ids)]
 expect('unique_share_pool', unique_share_pool.count(), 193006)
 log('# Completed finding unique share tweet')
 
-# Reconstruct tweet pool
+# Reduce memory footprint
 final_tweets_pool.unpersist()
 del final_tweets_pool
 gc.collect()
-
-distinct_tweets_pool = post_pool.collect().unionAll(unique_share_pool.collect())
-distinct_tweets_pool.cache()
-expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
-log('# Completed constructing distinct tweet pool')
 
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
-tweets_lexicon = distinct_tweets_pool.select(distinct_tweets_pool['id'], distinct_tweets_pool['body']).withColumn('score', udfBodyToRelevant('body'))
+post_lexicon = post_pool.select(post_pool['id'], post_pool['body']).withColumn('score', udfBodyToRelevant('body'))
+share_lexicon = unique_share_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
+tweets_lexicon = post_lexicon.unionAll(share_lexicon)
+
+expect('tweets_lexicon', tweets_lexicon.count(), 1124935 + 193006)
+log('# Completed constructing tweet lexicon')
 
 # Exclude development tweets
 tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
