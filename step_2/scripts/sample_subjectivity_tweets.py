@@ -188,31 +188,35 @@ gc.collect()
 
 # Find distinct set of tweets (unique body text)
 post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
-post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).collect()
+post_pool.persist(DISK_ONLY_2)
+post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
 expect('post_pool', post_pool.count(), 1124935)
 
 share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
+share_pool.persist(DISK_ONLY_2)
 expect('share_pool', share_pool.count(), 846141)
+
 broadcast_post_ids = sc.broadcast(set(post_pool_ids))
 unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id).collect()
-unique_share_pool = share_pool[share_pool['id'].isin(unique_share_ids)]
+unique_share_pool = share_pool.where(~ col('id').isin(unique_share_ids))
+unique_share_pool.persist(DISK_ONLY_2)
 expect('unique_share_pool', unique_share_pool.count(), 193006)
 log('# Completed finding unique share tweet')
 
 # Reduce memory footprint
-final_tweets_pool.unpersist()
-del final_tweets_pool
-gc.collect()
+del unique_share_ids
+final_tweets_pool.unpersist(blocking=True)
 
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
+
 post_lexicon = post_pool.select(post_pool['id'], post_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 log('# Completed calculating post lexicon')
 share_lexicon = unique_share_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 log('# Completed calculating share lexicon')
-tweets_lexicon = post_lexicon.unionAll(share_lexicon)
+tweets_lexicon = post_lexicon.union(share_lexicon)
 
 expect('tweets_lexicon', tweets_lexicon.count(), 1124935 + 193006)
 log('# Completed constructing tweet lexicon')
