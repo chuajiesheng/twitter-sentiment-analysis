@@ -4,6 +4,7 @@ import hashlib
 import gc
 from operator import *
 
+from pyspark import StorageLevel
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
@@ -78,6 +79,10 @@ sys.setdefaultencoding('utf-8')
 # Use SQLContext for better support
 sqlContext = SQLContext(sc)
 
+# Define storage level
+DISK_ONLY_2 = StorageLevel(True, False, False, False, 2)
+MEMORY_AND_DISK = StorageLevel(True, True, False, False, 1)
+
 # Read GNIP's JSON file
 directory = "tweets"
 datasets = sqlContext.read.json(directory)
@@ -128,7 +133,7 @@ expect('all_shares_wo_specific_users', all_shares_wo_specific_users.count(), all
 
 # Generate tweets pool with only English tweet
 tweets_pool = all_posts_wo_specific_users.unionAll(all_shares_wo_specific_users).filter("twitter_lang = 'en'")
-tweets_pool.cache()
+tweets_pool.persist(MEMORY_AND_DISK)
 tweets_pool_count = tweets_pool.count()
 # Adding all post to all share will be greater than tweet pool because of non-English tweet
 expected_tweets_pool_count = all_posts_count - all_posts_w_specific_users + \
@@ -150,8 +155,8 @@ lengths_np = np.array(tweets_pool_str_lengths)
 p = np.percentile(lengths_np, 20)
 
 final_tweets_pool = tweets_pool.filter(length('body') >= p)
-final_tweets_pool.cache()
-tweets_pool.unpersist()
+final_tweets_pool.persist(MEMORY_AND_DISK)
+tweets_pool.unpersist(blocking=True)
 
 final_tweets_pool_count = final_tweets_pool.count()
 percentage_kept = float(final_tweets_pool_count) / tweets_pool_count
