@@ -220,6 +220,7 @@ log('# Completed calculating post lexicon')
 share_lexicon = unique_share_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 log('# Completed calculating share lexicon')
 tweets_lexicon = post_lexicon.union(share_lexicon)
+tweets_lexicon.persist(DISK_ONLY_2)
 
 expect('tweets_lexicon', tweets_lexicon.count(), 1124935 + 193006)
 log('# Completed constructing tweet lexicon')
