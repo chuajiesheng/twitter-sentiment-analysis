@@ -196,9 +196,12 @@ share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
 share_pool.persist(DISK_ONLY_2)
 expect('share_pool', share_pool.count(), 846141)
 
-broadcast_post_ids = sc.broadcast(set(post_pool_ids))
-unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id).collect()
-unique_share_pool = share_pool.where(~ col('id').isin(unique_share_ids))
+broadcast_post_ids = sc.broadcast(set(post_pool_ids.collect()))
+unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id)
+
+broadcast_unique_share_ids = sc.broadcast(unique_share_ids.collect())
+unique_share_pool = share_pool.where(col('id').isin(broadcast_unique_share_ids.value))
+
 unique_share_pool.persist(DISK_ONLY_2)
 expect('unique_share_pool', unique_share_pool.count(), 193006)
 log('# Completed finding unique share tweet')
