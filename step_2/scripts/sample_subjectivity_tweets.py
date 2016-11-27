@@ -267,17 +267,18 @@ number_of_tweets_each = 1500
 positive_tweets = tweets_unsampled.orderBy(desc('score')).take(number_of_tweets_each)
 
 positive_tweet_file = "positive_tweets"
-positive_tweet_jsons = distinct_tweets_pool[distinct_tweets_pool['id'].isin(positive_tweets)].toJSON().collect()
+positive_tweets_ids = map(lambda t: t['id'], positive_tweets)
+positive_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(positive_tweets_ids)].toJSON().collect()
 to_json(positive_tweet_file, positive_tweet_jsons)
 to_csv(positive_tweet_file, positive_tweet_jsons)
 log('Exporting positive tweets to {}'.format(positive_tweet_file))
 log('# Completed exporting positive tweets')
 
 negative_tweets = tweets_unsampled.orderBy(asc('score')).take(number_of_tweets_each)
-negative_tweet_ids = [t['id'] for t in negative_tweets]
+negative_tweet_ids = map(lambda t: t['id'], negative_tweets)
 
 negative_tweet_file = "negative_tweets"
-negative_tweet_jsons = distinct_tweets_pool[distinct_tweets_pool['id'].isin(negative_tweet_ids)].toJSON().collect()
+negative_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(negative_tweet_ids)].toJSON().collect()
 to_json(negative_tweet_file, negative_tweet_jsons)
 to_csv(negative_tweet_file, negative_tweet_jsons)
 log('Exporting negative tweets to {}'.format(negative_tweet_file))
