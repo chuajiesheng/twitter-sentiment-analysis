@@ -198,29 +198,28 @@ expect('share_pool', share_pool.count(), 846141)
 
 broadcast_post_ids = sc.broadcast(set(post_pool_ids))
 unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id).collect()
-
-broadcast_unique_share_ids = sc.broadcast(unique_share_ids)
-
 expect('unique_share_pool', len(unique_share_ids), 193006)
 log('# Completed finding unique share tweet')
 
 # Constructing distinct tweet pool
-distinct_tweets_pool = final_tweets_pool.where(col('id').isin(broadcast_post_ids.value) | col('id').isin(broadcast_unique_share_ids.value))
-distinct_tweets_pool.persist(MEMORY_AND_DISK)
-expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
+broadcast_unique_share_ids = sc.broadcast(unique_share_ids)
+distinct_tweets_pool = final_tweets_pool.select(final_tweets_pool['id'], final_tweets_pool['body']).rdd.filter(lambda row: row['id'] in broadcast_post_ids.value or row['id'] in broadcast_unique_share_ids.value)
+distinct_tweets_count = distinct_tweets_pool.count()
+expect('distinct_tweets_pool', distinct_tweets_count, 1124935 + 193006)
 
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
 
-tweets_lexicon = distinct_tweets_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
+tweets_lexicon = distinct_tweets_pool.toDF().withColumn('score', udfBodyToRelevant('body'))
 tweets_lexicon.persist(MEMORY_AND_DISK)
 log('# Completed constructing tweet lexicon')
 
 # Exclude development tweets
 tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
-expect('tweets_unsampled', tweets_unsampled.count, len(final_tweets_ids) - number_of_dev_samples)
+tweets_unsampled_count = tweets_unsampled.count()
+expect('tweets_unsampled', tweets_unsampled_count, len(final_tweets_ids) - number_of_dev_samples)
 log('# Completed constructing unsampled tweets')
 
 # Take top and bottom
