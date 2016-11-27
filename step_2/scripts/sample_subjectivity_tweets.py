@@ -3,6 +3,7 @@ import json
 import hashlib
 import gc
 from operator import *
+import shlex
 
 from pyspark import StorageLevel
 from pyspark.sql import SQLContext
@@ -70,6 +71,46 @@ def sha(name, ext='json'):
             sha1.update(data)
 
     return sha1.hexdigest()
+
+
+def read_and_parse_clues():
+    DEFAULT_FILENAME = os.getcwd() + os.sep + 'subjectivity_clues' + os.sep + 'subjclueslen1-HLTEMNLP05.tff'
+
+    lines = None
+    with open(DEFAULT_FILENAME, 'r') as f:
+        lines = f.readlines()
+
+    clues = dict()
+    for l in lines:
+        clue = dict(token.split('=') for token in shlex.split(l))
+        word = clue['word1']
+        clues[word] = clue
+
+    return clues
+
+
+def calculate_relevant(lexicons, sentence):
+    PRIORPOLARITY = {
+        'positive': 1,
+        'negative': -1,
+        'both': 0,
+        'neutral': 0
+    }
+
+    TYPE = {
+        'strongsubj': 2,
+        'weaksubj': 1
+    }
+
+    total_score = 0
+
+    for w in sentence.split(' '):
+        if w not in lexicons.keys():
+            continue
+
+        total_score += PRIORPOLARITY[lexicons[w]['priorpolarity']] * TYPE[lexicons[w]['type']]
+
+    return total_score
 
 
 # Make sure Python uses UTF-8 as tweets contains emoticon and unicode
@@ -214,9 +255,8 @@ expect('tweets_unsampled', tweets_unsampled_count, len(final_tweets_ids) - numbe
 log('# Completed constructing unsampled tweets')
 
 # Calculate subjectivity
-c = clues.Clues()
-broadcast_clues = sc.broadcast(c)
-udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
+lexicons = read_and_parse_clues()
+udfBodyToRelevant = udf(lambda body: calculate_relevant(lexicons, body), IntegerType())
 
 tweets_lexicon = distinct_tweets_pool.toDF().withColumn('score', udfBodyToRelevant('body'))
 tweets_lexicon.persist(MEMORY_AND_DISK)
