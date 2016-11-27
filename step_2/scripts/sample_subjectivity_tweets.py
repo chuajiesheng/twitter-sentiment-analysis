@@ -188,12 +188,12 @@ gc.collect()
 
 # Find distinct set of tweets (unique body text)
 post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
-post_pool.persist(DISK_ONLY_2)
+post_pool.persist(MEMORY_AND_DISK)
 post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
 expect('post_pool', post_pool.count(), 1124935)
 
 share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
-share_pool.persist(DISK_ONLY_2)
+share_pool.persist(MEMORY_AND_DISK)
 expect('share_pool', share_pool.count(), 846141)
 
 broadcast_post_ids = sc.broadcast(set(post_pool_ids.collect()))
@@ -202,13 +202,13 @@ unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].a
 broadcast_unique_share_ids = sc.broadcast(unique_share_ids.collect())
 unique_share_pool = share_pool.where(col('id').isin(broadcast_unique_share_ids.value))
 
-unique_share_pool.persist(DISK_ONLY_2)
+unique_share_pool.persist(MEMORY_AND_DISK)
 expect('unique_share_pool', unique_share_pool.count(), 193006)
 log('# Completed finding unique share tweet')
 
-# Consturcting distinct tweet pool
+# Constructing distinct tweet pool
 distinct_tweets_pool = final_tweets_pool.where(col('id').isin(broadcast_post_ids.value) | col('id').isin(broadcast_unique_share_ids.value))
-distinct_tweets_pool.persist(DISK_ONLY_2)
+distinct_tweets_pool.persist(MEMORY_AND_DISK)
 expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
 
 # Calculate subjectivity
@@ -217,7 +217,7 @@ broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
 
 tweets_lexicon = distinct_tweets_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
-tweets_lexicon.persist(DISK_ONLY_2)
+tweets_lexicon.persist(MEMORY_AND_DISK)
 log('# Completed constructing tweet lexicon')
 
 # Exclude development tweets
