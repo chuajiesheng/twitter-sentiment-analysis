@@ -189,21 +189,19 @@ gc.collect()
 # Find distinct set of tweets (unique body text)
 post_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'post')
 post_pool.persist(MEMORY_AND_DISK)
-post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id)
+post_pool_ids = post_pool.select(post_pool['id']).rdd.sortBy(lambda x: x.id).map(lambda x: x.id).collect()
 expect('post_pool', post_pool.count(), 1124935)
 
 share_pool = final_tweets_pool.where(final_tweets_pool['verb'] == 'share')
 share_pool.persist(MEMORY_AND_DISK)
 expect('share_pool', share_pool.count(), 846141)
 
-broadcast_post_ids = sc.broadcast(set(post_pool_ids.collect()))
-unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id)
+broadcast_post_ids = sc.broadcast(set(post_pool_ids))
+unique_share_ids = share_pool.select(share_pool['id'], share_pool['object.id'].alias('object_id')).rdd.filter(lambda row: row['object_id'] not in broadcast_post_ids.value).map(lambda row: row.id).collect()
 
-broadcast_unique_share_ids = sc.broadcast(unique_share_ids.collect())
-unique_share_pool = share_pool.where(col('id').isin(broadcast_unique_share_ids.value))
+broadcast_unique_share_ids = sc.broadcast(unique_share_ids)
 
-unique_share_pool.persist(MEMORY_AND_DISK)
-expect('unique_share_pool', unique_share_pool.count(), 193006)
+expect('unique_share_pool', len(unique_share_ids), 193006)
 log('# Completed finding unique share tweet')
 
 # Constructing distinct tweet pool
