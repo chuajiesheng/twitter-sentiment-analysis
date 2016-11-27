@@ -207,6 +207,12 @@ distinct_tweets_pool = final_tweets_pool.select(final_tweets_pool['id'], final_t
 distinct_tweets_count = distinct_tweets_pool.count()
 expect('distinct_tweets_pool', distinct_tweets_count, 1124935 + 193006)
 
+# Exclude development tweets
+tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
+tweets_unsampled_count = tweets_unsampled.count()
+expect('tweets_unsampled', tweets_unsampled_count, len(final_tweets_ids) - number_of_dev_samples)
+log('# Completed constructing unsampled tweets')
+
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
@@ -215,12 +221,6 @@ udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
 tweets_lexicon = distinct_tweets_pool.toDF().withColumn('score', udfBodyToRelevant('body'))
 tweets_lexicon.persist(MEMORY_AND_DISK)
 log('# Completed constructing tweet lexicon')
-
-# Exclude development tweets
-tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
-tweets_unsampled_count = tweets_unsampled.count()
-expect('tweets_unsampled', tweets_unsampled_count, len(final_tweets_ids) - number_of_dev_samples)
-log('# Completed constructing unsampled tweets')
 
 # Take top and bottom
 number_of_tweets_each = 1500
