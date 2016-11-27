@@ -206,14 +206,15 @@ unique_share_pool.persist(DISK_ONLY_2)
 expect('unique_share_pool', unique_share_pool.count(), 193006)
 log('# Completed finding unique share tweet')
 
+# Consturcting distinct tweet pool
+distinct_tweets_pool = final_tweets_pool.where(col('id').isin(broadcast_post_ids.value) | col('id').isin(broadcast_unique_share_ids.value))
+distinct_tweets_pool.persist(DISK_ONLY_2)
+expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
+
 # Calculate subjectivity
 c = clues.Clues()
 broadcast_clues = sc.broadcast(c)
 udfBodyToRelevant = udf(broadcast_clues.value.calculate_relevant, IntegerType())
-
-distinct_tweets_pool = final_tweets_pool.where(col('id').isin(broadcast_post_ids.value) | col('id').isin(broadcast_unique_share_ids.value))
-distinct_tweets_pool.persist(DISK_ONLY_2)
-expect('distinct_tweets_pool', distinct_tweets_pool.count(), 1124935 + 193006)
 
 tweets_lexicon = distinct_tweets_pool.select(unique_share_pool['id'], unique_share_pool['body']).withColumn('score', udfBodyToRelevant('body'))
 tweets_lexicon.persist(DISK_ONLY_2)
