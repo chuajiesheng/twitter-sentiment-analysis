@@ -253,7 +253,7 @@ distinct_tweets_count = distinct_tweets_pool.count()
 expect('distinct_tweets_pool', distinct_tweets_count, 1124935 + 193006)
 
 # Exclude development tweets
-tweets_unsampled = distinct_tweets_pool.where(~ col('id').isin(dev_posts))
+tweets_unsampled = distinct_tweets_pool.toDF().where(~ col('id').isin(dev_posts))
 tweets_unsampled.persist(MEMORY_AND_DISK)
 tweets_unsampled_count = tweets_unsampled.count()
 # no. of dev intersect post pool: 1718, no. of share dev intersect unique share pool: 293
