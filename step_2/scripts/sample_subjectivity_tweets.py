@@ -244,27 +244,33 @@ log('# Completed finding unique share tweet')
 
 # Constructing distinct tweet pool
 broadcast_unique_share_ids = sc.broadcast(unique_share_ids)
-distinct_tweets_pool = final_tweets_pool.select(final_tweets_pool['id'], final_tweets_pool['body']).rdd.filter(lambda row: row['id'] in broadcast_post_ids.value or row['id'] in broadcast_unique_share_ids.value)
+distinct_tweets_pool = final_tweets_pool.\
+    select(final_tweets_pool['id'], final_tweets_pool['body']).\
+    rdd.\
+    filter(lambda row: row['id'] in broadcast_post_ids.value or row['id'] in broadcast_unique_share_ids.value)
+distinct_tweets_pool.persist(MEMORY_AND_DISK)
 distinct_tweets_count = distinct_tweets_pool.count()
 expect('distinct_tweets_pool', distinct_tweets_count, 1124935 + 193006)
 
 # Exclude development tweets
-tweets_unsampled = tweets_lexicon.where(~ col('id').isin(dev_posts))
+tweets_unsampled = distinct_tweets_pool.where(~ col('id').isin(dev_posts))
+tweets_unsampled.persist(MEMORY_AND_DISK)
 tweets_unsampled_count = tweets_unsampled.count()
-expect('tweets_unsampled', tweets_unsampled_count, len(final_tweets_ids) - number_of_dev_samples)
+# no. of dev intersect post pool: 1718, no. of share dev intersect unique share pool: 293
+expect('tweets_unsampled', tweets_unsampled_count, 1124935 + 193006 - 1718 - 293)
 log('# Completed constructing unsampled tweets')
 
 # Calculate subjectivity
 lexicons = read_and_parse_clues()
 udfBodyToRelevant = udf(lambda body: calculate_relevant(lexicons, body), IntegerType())
 
-tweets_lexicon = distinct_tweets_pool.toDF().withColumn('score', udfBodyToRelevant('body'))
+tweets_lexicon = tweets_unsampled.withColumn('score', udfBodyToRelevant('body'))
 tweets_lexicon.persist(MEMORY_AND_DISK)
 log('# Completed constructing tweet lexicon')
 
 # Take top and bottom
 number_of_tweets_each = 1500
-positive_tweets = tweets_unsampled.orderBy(desc('score')).take(number_of_tweets_each)
+positive_tweets = tweets_lexicon.orderBy(desc('score')).take(number_of_tweets_each)
 
 positive_tweet_file = "positive_tweets"
 positive_tweets_ids = map(lambda t: t['id'], positive_tweets)
@@ -274,7 +280,7 @@ to_csv(positive_tweet_file, positive_tweet_jsons)
 log('Exporting positive tweets to {}'.format(positive_tweet_file))
 log('# Completed exporting positive tweets')
 
-negative_tweets = tweets_unsampled.orderBy(asc('score')).take(number_of_tweets_each)
+negative_tweets = tweets_lexicon.orderBy(asc('score')).take(number_of_tweets_each)
 negative_tweet_ids = map(lambda t: t['id'], negative_tweets)
 
 negative_tweet_file = "negative_tweets"
