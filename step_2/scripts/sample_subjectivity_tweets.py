@@ -271,6 +271,18 @@ log('# Completed constructing tweet lexicon')
 # Take top and bottom
 number_of_tweets_each = 1500
 positive_tweets = tweets_lexicon.orderBy(desc('score')).take(number_of_tweets_each)
+negative_tweets = tweets_lexicon.orderBy(asc('score')).take(number_of_tweets_each)
+
+# Cut top and bottom via score for more deterministic sampling
+min_positive_score = positive_tweets[-1]['score']
+min_negative_score = negative_tweets[-1]['score']
+expect('min_positive_score', min_positive_score, 7)
+expect('min_negative_score', min_negative_score, -5)
+
+positive_tweets = tweets_lexicon.filter('score > {}'.format(min_positive_score - 1)).orderBy(desc('score')).collect()
+expect('positive_tweets', len(positive_tweets), 2012)
+negative_tweets = tweets_lexicon.filter('score < {}'.format(min_negative_score + 1)).orderBy(asc('score')).collect()
+expect('positive_tweets', len(negative_tweets), 1715)
 
 positive_tweet_file = "positive_tweets"
 positive_tweets_ids = map(lambda t: t['id'], positive_tweets)
