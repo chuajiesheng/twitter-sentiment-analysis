@@ -292,12 +292,16 @@ to_csv(positive_tweet_file, positive_tweet_jsons)
 log('Exporting positive tweets to {}'.format(positive_tweet_file))
 log('# Completed exporting positive tweets')
 
-negative_tweets = tweets_lexicon.orderBy(asc('score')).take(number_of_tweets_each)
-negative_tweet_ids = map(lambda t: t['id'], negative_tweets)
+expect('positive_tweet_file', sha(positive_tweet_file), 'cb2f8b691ccf3eae9846c67735f413a49befea28')
+expect('positive_tweet_file', sha(positive_tweet_file, ext='csv'), 'd3d43ab4e03fdf106b9191f4e0161cfcde3f040e')
 
 negative_tweet_file = "negative_tweets"
+negative_tweet_ids = map(lambda t: t['id'], negative_tweets)
 negative_tweet_jsons = final_tweets_pool[final_tweets_pool['id'].isin(negative_tweet_ids)].toJSON().collect()
 to_json(negative_tweet_file, negative_tweet_jsons)
 to_csv(negative_tweet_file, negative_tweet_jsons)
 log('Exporting negative tweets to {}'.format(negative_tweet_file))
 log('# Completed exporting negative tweets')
+
+expect('negative_tweet_file', sha(negative_tweet_file), '086c43427078092e538a779b8b06a71341b8da48')
+expect('negative_tweet_file', sha(negative_tweet_file, ext='csv'), 'd10a1a95156c28d844e9c4e668d766963c0636a4')
