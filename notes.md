@@ -51,6 +51,17 @@ hdfs dfs -checksum tweets/tweet_2.json
 hadoop fs -ls tweets
 ```
 
+### Copying files from local to S3
+```bash
+aws s3 cp dev_posts.csv s3://chipotle-crisis-final/step_2_results/dev_posts.csv
+aws s3 cp dev_posts.json s3://chipotle-crisis-final/step_2_results/dev_posts.json
+aws s3 cp negative_tweets.csv s3://chipotle-crisis-final/step_2_results/negative_tweets.csv
+aws s3 cp negative_tweets.json s3://chipotle-crisis-final/step_2_results/negative_tweets.json
+aws s3 cp positive_tweets.csv s3://chipotle-crisis-final/step_2_results/positive_tweets.csv
+aws s3 cp positive_tweets.json s3://chipotle-crisis-final/step_2_results/positive_tweets.json
+aws s3 cp sample_subjectivity_tweets.log s3://chipotle-crisis-final/step_2_results/sample_subjectivity_tweets.log
+```
+
 ### Downloading code
 Remember to use screen
 ```bash
