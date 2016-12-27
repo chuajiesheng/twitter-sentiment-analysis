@@ -1,28 +1,27 @@
 # import dataset
 
-import json
-INPUT_FILE = './analysis/input/dev_posts.json'
+FILES = ['./analysis/input/negative_tweets.txt', './analysis/input/neutral_tweets.txt', './analysis/input/positive_tweets.txt']
 
 tweets = []
-with open(INPUT_FILE, 'r') as f:
-    for line in f:
-        t = json.loads(line)
-        tweets.append(t['body'])
+for file in FILES:
+    tweet_set = []
+    with open(file, 'r') as f:
+        for line in f:
+            tweet_set.append(line.strip())
+
+    assert len(tweet_set) == 1367
+    tweets.extend(tweet_set)
 
 print('Total number of tweets: {}'.format(len(tweets)))
 
 # import results
-
 import numpy as np
-TARGET_FILE = './analysis/input/test_results.csv'
-
-f = open(TARGET_FILE)
-target = np.loadtxt(f)
+target = np.array([-1] * 1367 + [0] * 1367 + [1] * 1367)
 
 # split train/test 60/40
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.4, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.2, random_state=12)
 
 print('Train: {},{}'.format(len(X_train), y_train.shape))
 print('Test: {},{}'.format(len(X_test), y_test.shape))
@@ -71,6 +70,34 @@ print('F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average=None)))
 print('Macro Precision: \t{}'.format(metrics.precision_score(y_test, predicted, average='macro')))
 print('Macro Recall: \t\t{}'.format(metrics.recall_score(y_test, predicted, average='macro')))
 print('Macro F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average='macro')))
+print('--------------------------------------------------------------------------------')
+
+# stratified k-fold
+
+from sklearn.model_selection import StratifiedKFold
+skf = StratifiedKFold(n_splits=15)
+for train, test in skf.split(tweets, target):
+    X_train = np.array(tweets)[train]
+    y_train = target[train]
+
+    X_test = np.array(tweets)[test]
+    y_test = target[test]
+
+    pipeline = Pipeline([('vect', CountVectorizer(max_df=0.75, ngram_range=(1, 2))),
+                         ('tfidf', TfidfTransformer(norm='l1', use_idf=False)),
+                         ('clf', ExtraTreesClassifier(random_state=0, n_estimators=10, class_weight='auto'))])
+    pipeline = pipeline.fit(X_train, y_train)
+
+    predicted = pipeline.predict(X_test)
+    print('Accuracy: {}'.format(np.mean(predicted == y_test)))
+    print(metrics.classification_report(y_test, predicted))
+    print('Macro Precision: \t{}'.format(metrics.precision_score(y_test, predicted, average='macro')))
+    print('Macro Recall: \t\t{}'.format(metrics.recall_score(y_test, predicted, average='macro')))
+    print('Macro F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average='macro')))
+    print('.')
+
+
+print('--------------------------------------------------------------------------------')
 
 # grid search
 
@@ -86,19 +113,24 @@ parameters = {
     'clf__random_state': (0, 1),
     'clf__class_weight': ('auto', 'balanced', {-1: 0.5, 0: 0.01, 1: 0.49})
 }
-grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
+scores = ['accuracy', 'f1_macro', 'precision_macro', 'recall_macro']
+for score in scores:
+    print('Scoring: {}'.format(score))
+    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1, cv=5, scoring=score)
 
-print('Performing grid search...')
-print('pipeline: {}'.format([name for name, _ in pipeline.steps]))
-print('parameters:')
-pprint(parameters)
-t0 = time()
-grid_search.fit(tweets, target)
-print("Done in %0.3fs" % (time() - t0))
-print()
+    print('Performing grid search...')
+    print('pipeline: {}'.format([name for name, _ in pipeline.steps]))
+    print('parameters:')
+    pprint(parameters)
+    t0 = time()
+    grid_search.fit(tweets, target)
+    print("Done in %0.3fs" % (time() - t0))
+    print()
 
-print("Best score: %0.3f" % grid_search.best_score_)
-print("Best parameters set:")
-best_parameters = grid_search.best_estimator_.get_params()
-for param_name in sorted(parameters.keys()):
-    print("\t%s: %r" % (param_name, best_parameters[param_name]))
+    print("Best score: %0.3f" % grid_search.best_score_)
+    print("Best parameters set:")
+    best_parameters = grid_search.best_estimator_.get_params()
+    for param_name in sorted(parameters.keys()):
+        print("\t%s: %r" % (param_name, best_parameters[param_name]))
+
+    print('--------------------------------------------------------------------------------')
