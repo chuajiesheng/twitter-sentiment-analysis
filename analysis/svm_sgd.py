@@ -27,13 +27,47 @@ X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.
 print('Train: {},{}'.format(len(X_train), y_train.shape))
 print('Test: {},{}'.format(len(X_test), y_test.shape))
 
+
 # train
+class NewTokenizer(object):
+    SYMBOLS = [',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', ' ', '&', '$', '-', '|', '«', '`', ' ']
+
+    def __init__(self, n, k):
+        from nltk.tokenize.casual import TweetTokenizer
+        from nltk.stem import WordNetLemmatizer
+
+        self.tknzr = TweetTokenizer()
+        self.wnl = WordNetLemmatizer()
+
+        self.n = n
+        self.k = k
+
+    @staticmethod
+    def remove_single_symbols(tokens):
+        return [t.lower() for t in tokens if t.lower() not in NewTokenizer.SYMBOLS]
+
+    @staticmethod
+    def remove_full_stops(tokens):
+        return [t.lower() for t in tokens if t.lower() not in [' ', '.']]
+
+    def __call__(self, t):
+        from nltk.sentiment.util import mark_negation
+        from nltk.util import skipgrams
+
+        tokenised_tweet = self.remove_single_symbols(self.tknzr.tokenize(t))
+        lemmatised_tweet = [self.wnl.lemmatize(w) for w in tokenised_tweet]
+        three_to_six_chars_words = [w for w in lemmatised_tweet if (2 < len(w) < 7)]
+        negated_tweet = mark_negation(three_to_six_chars_words)
+        list_of_skipgrams = list(skipgrams(negated_tweet, self.n, self.k))
+        features = list([' '.join(self.remove_full_stops(list(s))) for s in list_of_skipgrams])
+
+        return features
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
-pipeline = Pipeline([('vect', CountVectorizer()),
+pipeline = Pipeline([('vect', CountVectorizer(tokenizer=NewTokenizer(2, 2))),
                      ('tfidf', TfidfTransformer()),
                      ('clf', SGDClassifier(loss='squared_loss', penalty='l2', alpha=1e-3, n_iter=5, random_state=42))])
 
@@ -69,6 +103,7 @@ parameters = {
     'vect__max_df': (0.5, 0.75, 1.0),
     #'vect__max_features': (None, 5000, 10000, 50000),
     'vect__ngram_range': ((1, 1), (1, 2)),  # unigrams or bigrams
+    'vect__tokenizer': (NewTokenizer(3, 2), NewTokenizer(2, 2), None),
     'tfidf__use_idf': (True, False),
     'tfidf__norm': ('l1', 'l2'),
     'clf__loss': ('squared_loss', 'hinge', 'log', 'epsilon_insensitive'),
