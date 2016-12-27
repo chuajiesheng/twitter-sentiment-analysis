@@ -34,14 +34,15 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
 pipeline = Pipeline([('vect', CountVectorizer(max_df=0.75, ngram_range=(1,2))),
                      ('tfidf', TfidfTransformer(norm='l1', use_idf=False)),
-                     ('clf', ExtraTreesClassifier(random_state=0, n_estimators=10, class_weight='auto'))])
+                     ('clf', ExtraTreesClassifier(random_state=0, n_estimators=20, class_weight='auto'))])
 
 pipeline = pipeline.fit(X_train, y_train)
 
 # predict
 
 predicted = pipeline.predict(X_test)
-print('Accuracy: {}'.format(np.mean(predicted == y_test)))
+from sklearn.metrics import accuracy_score
+print('Accuracy: {}'.format(accuracy_score(y_test, predicted)))
 
 X_ones = np.array(X_test)[y_test == 1]
 predicted_positive = pipeline.predict(X_ones)
@@ -74,9 +75,9 @@ print('-------------------------------------------------------------------------
 
 # stratified k-fold
 
-from sklearn.model_selection import StratifiedKFold
-skf = StratifiedKFold(n_splits=15)
-for train, test in skf.split(tweets, target):
+from sklearn.model_selection import ShuffleSplit
+ss = ShuffleSplit(n_splits=3, test_size=0.2, random_state=10)
+for train, test in ss.split(tweets, target):
     X_train = np.array(tweets)[train]
     y_train = target[train]
 
