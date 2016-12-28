@@ -1,28 +1,26 @@
 # import dataset
 
-import json
-INPUT_FILE = './analysis/input/dev_posts.json'
+FILES = ['./analysis/input/negative_tweets.txt', './analysis/input/neutral_tweets.txt', './analysis/input/positive_tweets.txt']
 
 tweets = []
-with open(INPUT_FILE, 'r') as f:
-    for line in f:
-        t = json.loads(line)
-        tweets.append(t['body'])
+for file in FILES:
+    tweet_set = []
+    with open(file, 'r') as f:
+        for line in f:
+            tweet_set.append(line)
+
+    assert len(tweet_set) == 1367
+    tweets.extend(tweet_set)
 
 print('Total number of tweets: {}'.format(len(tweets)))
 
 # import results
-
 import numpy as np
-TARGET_FILE = './analysis/input/test_results.csv'
-
-f = open(TARGET_FILE)
-target = np.loadtxt(f)
+target = np.array([-1] * 1367 + [0] * 1367 + [1] * 1367)
 
 # split train/test 60/40
-
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.4, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.1, random_state=1)
 
 print('Train: {},{}'.format(len(X_train), y_train.shape))
 print('Test: {},{}'.format(len(X_test), y_test.shape))
