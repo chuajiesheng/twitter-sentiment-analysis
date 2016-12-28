@@ -94,6 +94,7 @@ print('Confusion matrix: \n{}'.format(metrics.confusion_matrix(y_test, predicted
 
 # grid search
 
+from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import GridSearchCV
 from pprint import pprint
 from time import time
@@ -109,7 +110,7 @@ parameters = {
     'clf__penalty': ('l2', 'elasticnet'),
     'clf__n_iter': (5, 10, 50, 80),
 }
-grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
+grid_search = GridSearchCV(pipeline, parameters, n_jobs=8, cv=ShuffleSplit(n_splits=10, test_size=0.2, random_state=10), verbose=1, scoring='accuracy')
 
 print('Performing grid search...')
 print('pipeline: {}'.format([name for name, _ in pipeline.steps]))
