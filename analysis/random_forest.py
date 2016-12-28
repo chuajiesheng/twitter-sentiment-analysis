@@ -67,7 +67,7 @@ print('Train: \t\tX:{},\tY:{}'.format(len(X_train), y_train.shape[0]))
 print('Test: \t\tX:{},\tY:{}'.format(len(X_test), y_test.shape[0]))
 
 # train
-count_vect = CountVectorizer(max_df=0.75, ngram_range=(1, 2))
+count_vect = CountVectorizer(max_df=0.75, ngram_range=(1, 2), analyzer='word', stop_words='english')
 X_train_counts = count_vect.fit_transform(X_train)
 tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
 X_train_tf = tf_transformer.transform(X_train_counts)
