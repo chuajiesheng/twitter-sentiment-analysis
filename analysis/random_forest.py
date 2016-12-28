@@ -27,7 +27,7 @@ print('Train: {},{}'.format(len(X_train), y_train.shape))
 print('Test: {},{}'.format(len(X_test), y_test.shape))
 
 # train
-
+print('------------------------------- Best Parameters --------------------------------')
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.ensemble import ExtraTreesClassifier
@@ -71,12 +71,14 @@ print('F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average=None)))
 print('Macro Precision: \t{}'.format(metrics.precision_score(y_test, predicted, average='macro')))
 print('Macro Recall: \t\t{}'.format(metrics.recall_score(y_test, predicted, average='macro')))
 print('Macro F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average='macro')))
-print('--------------------------------------------------------------------------------')
 
 # stratified k-fold
+print('-------------------------------- Shuffle Split ---------------------------------')
+total_score = 0
+runs = 0
 
 from sklearn.model_selection import ShuffleSplit
-ss = ShuffleSplit(n_splits=3, test_size=0.2, random_state=10)
+ss = ShuffleSplit(n_splits=10, test_size=0.2, random_state=10)
 for train, test in ss.split(tweets, target):
     X_train = np.array(tweets)[train]
     y_train = target[train]
@@ -90,18 +92,20 @@ for train, test in ss.split(tweets, target):
     pipeline = pipeline.fit(X_train, y_train)
 
     predicted = pipeline.predict(X_test)
-    print('Accuracy: {}'.format(np.mean(predicted == y_test)))
+    print('Accuracy: {}'.format(accuracy_score(y_test, predicted)))
     print(metrics.classification_report(y_test, predicted))
     print('Macro Precision: \t{}'.format(metrics.precision_score(y_test, predicted, average='macro')))
     print('Macro Recall: \t\t{}'.format(metrics.recall_score(y_test, predicted, average='macro')))
     print('Macro F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average='macro')))
     print('.')
 
+    total_score += accuracy_score(y_test, predicted)
+    runs += 1
 
-print('--------------------------------------------------------------------------------')
+print("Average Accuracy: %0.3f" % (total_score / runs))
 
 # grid search
-
+print('--------------------------------- Grid Search ----------------------------------')
 from sklearn.model_selection import GridSearchCV
 from pprint import pprint
 from time import time
@@ -117,7 +121,10 @@ parameters = {
 scores = ['accuracy', 'f1_macro', 'precision_macro', 'recall_macro']
 for score in scores:
     print('Scoring: {}'.format(score))
-    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1, cv=5, scoring=score)
+    grid_search = GridSearchCV(pipeline, parameters,
+                               n_jobs=10, verbose=1,
+                               cv=ShuffleSplit(n_splits=10, test_size=0.2, random_state=10),
+                               scoring=score)
 
     print('Performing grid search...')
     print('pipeline: {}'.format([name for name, _ in pipeline.steps]))
