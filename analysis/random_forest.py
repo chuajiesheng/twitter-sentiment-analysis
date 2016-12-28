@@ -63,7 +63,6 @@ normalised_confusion_matrix = confusion_matrix / confusion_matrix.astype(np.floa
 print('Confusion matrix: \n{}'.format(confusion_matrix))
 print('Normalised Confusion matrix: \n{}'.format(normalised_confusion_matrix))
 
-from sklearn import metrics
 print('Precision: \t{}'.format(metrics.precision_score(y_test, predicted, average=None)))
 print('Recall: \t{}'.format(metrics.recall_score(y_test, predicted, average=None)))
 print('F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average=None)))
@@ -72,5 +71,20 @@ print('Macro Precision: \t{}'.format(metrics.precision_score(y_test, predicted, 
 print('Macro Recall: \t\t{}'.format(metrics.recall_score(y_test, predicted, average='macro')))
 print('Macro F1: \t\t{}'.format(metrics.f1_score(y_test, predicted, average='macro')))
 
-import code
-code.interact(local=dict(globals(), **locals()))
+
+forest = pipeline.steps[2][1]
+importances = forest.feature_importances_
+no_of_features = len(importances)
+std = np.std([tree.feature_importances_ for tree in forest.estimators_], axis=0)
+indices = range(no_of_features)
+
+# Plot the feature importances of the forest
+import matplotlib.pyplot as plt
+plt.figure()
+plt.title("Feature importances")
+plt.bar(range(no_of_features), importances[indices], color="r", yerr=std[indices], align="center")
+plt.xticks(range(no_of_features), indices)
+plt.xlim([-1, no_of_features])
+plt.show()
+
+import code; code.interact(local=dict(globals(), **locals()))
