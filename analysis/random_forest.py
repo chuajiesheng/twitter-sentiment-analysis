@@ -90,6 +90,9 @@ print('Accuracy: \t{}'.format(accuracy_score(y_test, predicted)))
 print('Macro F1: \t{}'.format(f1_score(y_test, predicted, average='macro')))
 print(classification_report(y_test, predicted))
 
+del count_vect
+del tf_transformer
+del clf
 
 ss = ShuffleSplit(n_splits=10, test_size=0.2, random_state=10)
 total_score = 0.0
@@ -102,14 +105,15 @@ for train, test in ss.split(tweets, target):
     X_test = np.array(tweets)[test]
     y_test = target[test]
 
-    X_train_counts = count_vect.transform(X_train)
+    count_vect = CountVectorizer(max_df=0.75, ngram_range=(1, 2), analyzer='word', stop_words='english')
+    X_train_counts = count_vect.fit_transform(X_train)
+    tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
-    X_train_new_tf = X_train_tf[:, indices]
-    clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(X_train_new_tf, y_train)
+    clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(X_train_tf, y_train)
 
     X_test_counts = count_vect.transform(X_test)
     X_test_tfidf = tf_transformer.transform(X_test_counts)
-    predicted = clf.predict(X_test_tfidf[:, indices])
+    predicted = clf.predict(X_test_tfidf)
 
     print('[{}] Accuracy: \t{}'.format(runs + 1, accuracy_score(y_test, predicted)))
     print('[{}] Macro F1: \t{}'.format(runs + 1, f1_score(y_test, predicted, average='macro')))
