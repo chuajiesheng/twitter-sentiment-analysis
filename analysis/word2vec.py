@@ -1,9 +1,6 @@
 import numpy as np
-import re
-from nltk.corpus import stopwords
-import nltk
-import logging
-from gensim.models import word2vec
+from sklearn.model_selection import *
+from sklearn.ensemble import *
 
 
 def get_dataset():
@@ -23,51 +20,137 @@ def get_dataset():
     return x, y
 
 
-def sentence_to_wordlist(sentence, remove_stopwords=False):
-    review_text = re.sub('[^a-zA-Z]', ' ', sentence)
-    words = review_text.lower().split()
-    if remove_stopwords:
-        stops = set(stopwords.words("english"))
-        words = [w for w in words if not w in stops]
+# gensim modules
+from gensim import utils
+from gensim.models.doc2vec import TaggedDocument
+from gensim.models import Doc2Vec
 
-    return words
+# random shuffle
+from random import shuffle
+
+# numpy
+import numpy
+
+# classifier
+from sklearn.linear_model import LogisticRegression
+
+import logging
+import sys
+
+log = logging.getLogger()
+log.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+log.addHandler(ch)
 
 
-def tweet_to_sentences(review, tokenizer, remove_stopwords=False):
-    raw_sentences = tokenizer.tokenize(review.strip())
-    sentences = []
-    for raw_sentence in raw_sentences:
-        if len(raw_sentence) > 0:
-            sentences.append(sentence_to_wordlist(raw_sentence, remove_stopwords))
+class TaggedLineSentence(object):
+    def __init__(self, sources):
+        self.sources = sources
 
-    return sentences
+        flipped = {}
+
+        # make sure that keys are unique
+        for key, value in sources.items():
+            if value not in flipped:
+                flipped[value] = [key]
+            else:
+                raise Exception('Non-unique prefix encountered')
+
+    def __iter__(self):
+        for source, prefix in self.sources.items():
+            with utils.smart_open(source) as fin:
+                for item_no, line in enumerate(fin):
+                    yield TaggedDocument(utils.to_unicode(line).split(), [prefix + '_%s' % item_no])
+
+    def to_array(self):
+        self.sentences = []
+        for source, prefix in self.sources.items():
+            with utils.smart_open(source) as fin:
+                for item_no, line in enumerate(fin):
+                    self.sentences.append(TaggedDocument(utils.to_unicode(line).split(), [prefix + '_%s' % item_no]))
+        return self.sentences
+
+    def sentences_perm(self):
+        shuffle(self.sentences)
+        return self.sentences
 
 
-punkt_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-X, Y = get_dataset()
-sentences = []
+log.info('source load')
+sources = {'./analysis/input/negative_tweets.txt': 'NEG', './analysis/input/neutral_tweets.txt': 'NEU', './analysis/input/positive_tweets.txt': 'POS'}
 
-print('Parsing sentences from training set')
-for tweet in X:
-    sentences += tweet_to_sentences(tweet, punkt_tokenizer)
+log.info('TaggedDocument')
+sentences = TaggedLineSentence(sources)
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-num_features = 300  # Word vector dimensionality
-min_word_count = 10  # Minimum word count
-num_workers = 4  # Number of threads to run in parallel
-context = 10  # Context window size
-downsampling = 1e-3  # Downsample setting for frequent words
+log.info('D2V')
+model = Doc2Vec(min_count=1, window=60, size=100, sample=1e-4, negative=5, workers=7)
+model.build_vocab(sentences.to_array())
 
-print('Training model...')
-model = word2vec.Word2Vec(sentences, workers=num_workers, size=num_features, min_count=min_word_count, window=context, sample=downsampling)
-
-# If you don't plan to train the model any further, calling
-# init_sims will make the model much more memory-efficient.
-model.init_sims(replace=True)
-
-# It can be helpful to create a meaningful model name and
-# save the model for later use. You can load it later using Word2Vec.load()
-model_name = '300features_40minwords_10context'
-model.save(model_name)
+log.info('Epoch')
+for epoch in range(10):
+    log.info('EPOCH: {}'.format(epoch))
+    model.train(sentences.sentences_perm())
 
 import code; code.interact(local=dict(globals(), **locals()))
+
+log.info('Model Save')
+model.save('./imdb.d2v')
+model = Doc2Vec.load('./imdb.d2v')
+
+log.info('Sentiment')
+X, Y = get_dataset()
+ss = ShuffleSplit(n_splits=10, test_size=0.2, random_state=10)
+for train, test in ss.split(X, Y):
+    size_train = len(train)
+    size_test = len(test)
+
+    train_arrays = numpy.zeros((size_train, 100))
+    train_labels = numpy.zeros(size_train)
+
+    X_train = np.array(X)[train]
+    y_train = Y[train]
+
+    X_test = np.array(X)[test]
+    y_test = Y[test]
+
+    for index, i in enumerate(train):
+        if Y[i] == 1:
+            prefix = 'POS_' + str(i - 1367 - 1367)
+        elif Y[i] == 0:
+            prefix = 'NEU_' + str(i - 1367)
+        else:
+            prefix = 'NEG_' + str(i)
+        train_arrays[index] = model.docvecs[prefix]
+        train_labels[index] = Y[i]
+
+    test_arrays = numpy.zeros((size_test, 100))
+    test_labels = numpy.zeros(size_test)
+
+    for index, i in enumerate(test):
+        if Y[i] == 1:
+            prefix = 'POS_' + str(i - 1367 - 1367)
+        elif Y[i] == 0:
+            prefix = 'NEU_' + str(i - 1367)
+        else:
+            prefix = 'NEG_' + str(i)
+        test_arrays[index] = model.docvecs[prefix]
+        test_labels[index] = Y[i]
+
+    log.info('Fitting')
+    classifier = LogisticRegression(C=1.0, dual=False, fit_intercept=True, intercept_scaling=1, penalty='l2', random_state=None, tol=0.00001)
+    classifier.fit(train_arrays, train_labels)
+    print(classifier.score(test_arrays, test_labels))
+
+    clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(train_arrays, train_labels)
+    print(clf.score(test_arrays, test_labels))
+
+
+def parts(str, current, elements):
+    if len(str) < 1:
+        return elements + [current]
+    if current == '' or current.startswith(str[0]):
+        return parts(str[1:], current + str[0], elements)
+    return parts(str[1:], str[0], elements + [current])
