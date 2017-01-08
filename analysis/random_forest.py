@@ -2,43 +2,7 @@ import numpy as np
 from sklearn.metrics import *
 from sklearn.feature_extraction.text import *
 from sklearn.ensemble import *
-from sklearn.pipeline import *
 from sklearn.model_selection import *
-
-
-class SkipgramTokenizer(object):
-    SYMBOLS = [',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', ' ', '&', '$', '-', '|', '«', '`', ' ']
-
-    def __init__(self, n, k):
-        from nltk.tokenize.casual import TweetTokenizer
-        from nltk.stem import WordNetLemmatizer
-
-        self.tknzr = TweetTokenizer()
-        self.wnl = WordNetLemmatizer()
-
-        self.n = n
-        self.k = k
-
-    @staticmethod
-    def remove_single_symbols(tokens):
-        return [t.lower() for t in tokens if t.lower() not in SkipgramTokenizer.SYMBOLS]
-
-    @staticmethod
-    def remove_full_stops(tokens):
-        return [t.lower() for t in tokens if t.lower() not in [' ', '.']]
-
-    def __call__(self, t):
-        from nltk.sentiment.util import mark_negation
-        from nltk.util import skipgrams
-
-        tokenised_tweet = self.remove_single_symbols(self.tknzr.tokenize(t))
-        lemmatised_tweet = [self.wnl.lemmatize(w) for w in tokenised_tweet]
-        three_to_six_chars_words = [w for w in lemmatised_tweet if (2 < len(w) < 7)]
-        negated_tweet = mark_negation(three_to_six_chars_words)
-        list_of_skipgrams = list(skipgrams(negated_tweet, self.n, self.k))
-        features = list([' '.join(self.remove_full_stops(list(s))) for s in list_of_skipgrams])
-
-        return features
 
 
 def get_dataset():
@@ -67,7 +31,7 @@ print('Train: \t\tX:{},\tY:{}'.format(len(X_train), y_train.shape[0]))
 print('Test: \t\tX:{},\tY:{}'.format(len(X_test), y_test.shape[0]))
 
 # train
-count_vect = CountVectorizer(max_df=0.75, ngram_range=(1, 2), analyzer='word', stop_words='english')
+count_vect = CountVectorizer(ngram_range=(1, 2), analyzer='word', stop_words='english')
 X_train_counts = count_vect.fit_transform(X_train)
 tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
 X_train_tf = tf_transformer.transform(X_train_counts)
@@ -105,7 +69,7 @@ for train, test in ss.split(tweets, target):
     X_test = np.array(tweets)[test]
     y_test = target[test]
 
-    count_vect = CountVectorizer(max_df=0.75, ngram_range=(1, 2), analyzer='word', stop_words='english')
+    count_vect = CountVectorizer(ngram_range=(1, 2), analyzer='word', stop_words='english')
     X_train_counts = count_vect.fit_transform(X_train)
     tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
