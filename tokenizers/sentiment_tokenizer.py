@@ -39,6 +39,6 @@ class SentimentTokenizer(object):
         rebuild_str = ' '.join(cleaned_tokens)
 
         negated_tokens = mark_negation(list(self.tknzr.tokenize(rebuild_str)))
-        list_of_trigrams = list(trigrams(negated_tokens))
-        return list([' '.join(s) for s in list_of_trigrams])
+        list_of_trigrams = list([' '.join(s) for s in trigrams(negated_tokens)])
+        return list_of_trigrams
 
