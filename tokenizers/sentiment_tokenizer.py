@@ -28,7 +28,7 @@ class SentimentTokenizer(object):
 
     def __call__(self, t):
         t = self.reduce_lengthening(t)
-        tokens = list(self.tknzr.tokenize(t))
+        tokens = t.split(' ')
 
         cleaned_tokens = []
         for token in tokens:
@@ -36,7 +36,9 @@ class SentimentTokenizer(object):
             token = self.replace_link(token)
             cleaned_tokens.append(token)
 
-        negated_tokens = mark_negation(cleaned_tokens)
+        rebuild_str = ' '.join(cleaned_tokens)
+
+        negated_tokens = mark_negation(list(self.tknzr.tokenize(rebuild_str)))
         list_of_trigrams = list(trigrams(negated_tokens))
         return list([' '.join(s) for s in list_of_trigrams])
 
