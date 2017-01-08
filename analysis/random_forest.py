@@ -21,12 +21,13 @@ def get_dataset():
     y = np.array([-1] * 1367 + [0] * 1367 + [1] * 1367)
     return x, y
 
-tweets, target = get_dataset()
-# split train/test 60/40
 
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(tweets, target, test_size=0.2, random_state=12)
+def split_dataset(X, y, test_size=0.2, random_state=42):
+    return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
+
+X, y = get_dataset()
+X_train, X_test, y_train, y_test = split_dataset(X, y)
 print('Train: \t\tX:{},\tY:{}'.format(len(X_train), y_train.shape[0]))
 print('Test: \t\tX:{},\tY:{}'.format(len(X_test), y_test.shape[0]))
 
@@ -45,29 +46,16 @@ print('Accuracy: \t{}'.format(accuracy_score(y_test, predicted)))
 print('Macro F1: \t{}'.format(f1_score(y_test, predicted, average='macro')))
 print(classification_report(y_test, predicted))
 
-indices = np.argsort(clf.feature_importances_)[::-1][:2000] # 2000 features give 0.6116277334606841
-X_train_new_tf = X_train_tf[:, indices]
-clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(X_train_new_tf, y_train)
-predicted = clf.predict(X_test_tfidf[:, indices])
-
-print('Accuracy: \t{}'.format(accuracy_score(y_test, predicted)))
-print('Macro F1: \t{}'.format(f1_score(y_test, predicted, average='macro')))
-print(classification_report(y_test, predicted))
-
-del count_vect
-del tf_transformer
-del clf
-
 ss = ShuffleSplit(n_splits=10, test_size=0.2, random_state=10)
 total_score = 0.0
 total_f1 = 0.0
 runs = 0
-for train, test in ss.split(tweets, target):
-    X_train = np.array(tweets)[train]
-    y_train = target[train]
+for train, test in ss.split(X, y):
+    X_train = np.array(X)[train]
+    y_train = y[train]
 
-    X_test = np.array(tweets)[test]
-    y_test = target[test]
+    X_test = np.array(X)[test]
+    y_test = y[test]
 
     count_vect = CountVectorizer(ngram_range=(1, 2), analyzer='word', stop_words='english')
     X_train_counts = count_vect.fit_transform(X_train)
