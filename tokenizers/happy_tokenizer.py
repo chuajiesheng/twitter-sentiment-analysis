@@ -47,7 +47,7 @@ __email__ = "See the author's website"
 ######################################################################
 
 import re
-import htmlentitydefs
+import html.entities
 
 ######################################################################
 # The following strings are components in the regular expression
@@ -148,10 +148,10 @@ class Tokenizer:
         """
         # Try to ensure unicode:
         try:
-            s = unicode(s)
+            s = str(s)
         except UnicodeDecodeError:
             s = str(s).encode('string_escape')
-            s = unicode(s)
+            s = str(s)
         # Fix HTML character entitites:
         s = self.__html2unicode(s)
         # Tokenize:
@@ -203,7 +203,7 @@ class Tokenizer:
         for ent in ents:
             entname = ent[1:-1]
             try:
-                s = s.replace(ent, unichr(htmlentitydefs.name2codepoint[entname]))
+                s = s.replace(ent, unichr(html.entities.name2codepoint[entname]))
             except:
                 pass
             s = s.replace(amp, " and ")

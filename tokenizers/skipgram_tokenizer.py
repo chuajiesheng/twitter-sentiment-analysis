@@ -11,7 +11,7 @@ class SkipgramTokenizer(object):
         self.k = k
 
     def __call__(self, t):
-        tokenised_tweet = self.tknzr.tokenize(t)
+        tokenised_tweet = list(self.tknzr.tokenize(t))
         negated_tweet = mark_negation(tokenised_tweet)
         list_of_skipgrams = list(skipgrams(negated_tweet, self.n, self.k))
         return list([' '.join(s) for s in list_of_skipgrams])
