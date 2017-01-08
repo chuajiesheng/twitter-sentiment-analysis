@@ -27,16 +27,16 @@ class SentimentTokenizer(object):
         return '__url__' if validators.url(token) else token
 
     def __call__(self, t):
-        text = self.reduce_lengthening(t)
-        tokens = list(self.tknzr.tokenize(text))
+        t = self.reduce_lengthening(t)
+        tokens = list(self.tknzr.tokenize(t))
 
         cleaned_tokens = []
-        for t in tokens:
-            t = self.replace_username(t)
-            t = self.replace_link(t)
-            cleaned_tokens.append(t)
+        for token in tokens:
+            token = self.replace_username(token)
+            token = self.replace_link(token)
+            cleaned_tokens.append(token)
 
         negated_tokens = mark_negation(cleaned_tokens)
-        list_of_skipgrams = list(trigrams(negated_tokens))
-        return list([' '.join(s) for s in list_of_skipgrams])
+        list_of_trigrams = list(trigrams(negated_tokens))
+        return list([' '.join(s) for s in list_of_trigrams])
 
