@@ -3,7 +3,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import *
 from sklearn.metrics import *
-from tokenizers import SkipgramTokenizer
+from tokenizers import *
 import numpy as np
 from pprint import pprint
 from time import time
