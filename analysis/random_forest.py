@@ -32,11 +32,12 @@ print('Train: \t\tX:{},\tY:{}'.format(len(X_train), y_train.shape[0]))
 print('Test: \t\tX:{},\tY:{}'.format(len(X_test), y_test.shape[0]))
 
 # train
-count_vect = CountVectorizer(ngram_range=(1, 2), analyzer='word', stop_words='english')
+count_vect = CountVectorizer(ngram_range=(1, 3))
 X_train_counts = count_vect.fit_transform(X_train)
+
 tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
 X_train_tf = tf_transformer.transform(X_train_counts)
-clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(X_train_tf, y_train)
+clf = RandomForestClassifier(random_state=0, n_estimators=240, class_weight='auto').fit(X_train_tf, y_train)
 
 X_test_counts = count_vect.transform(X_test)
 X_test_tfidf = tf_transformer.transform(X_test_counts)
@@ -57,11 +58,11 @@ for train, test in ss.split(X, y):
     X_test = np.array(X)[test]
     y_test = y[test]
 
-    count_vect = CountVectorizer(ngram_range=(1, 2), analyzer='word', stop_words='english')
+    count_vect = CountVectorizer(ngram_range=(1, 3))
     X_train_counts = count_vect.fit_transform(X_train)
     tf_transformer = TfidfTransformer(norm='l1', use_idf=False).fit(X_train_counts)
     X_train_tf = tf_transformer.transform(X_train_counts)
-    clf = RandomForestClassifier(random_state=0, n_estimators=80, class_weight='auto').fit(X_train_tf, y_train)
+    clf = RandomForestClassifier(random_state=0, n_estimators=240, class_weight='auto').fit(X_train_tf, y_train)
 
     X_test_counts = count_vect.transform(X_test)
     X_test_tfidf = tf_transformer.transform(X_test_counts)
