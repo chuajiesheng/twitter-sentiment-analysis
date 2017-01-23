@@ -45,7 +45,7 @@ class SentimentTokenizer(object):
         return self.sentiment_aware_tokenize(doc)
 
 
-tokenizers = {
+various_tokenizers = {
     'Whitespace': WhitespaceTokenizer(),
     'Treebank-style': TreebankTokenizer(),
     'Sentiment-aware': SentimentTokenizer()
@@ -53,14 +53,15 @@ tokenizers = {
 train_sizes = list(range(10, 100, 10))
 X, y = get_dataset()
 
-f1_csv = open('analysis/output/f1.csv', 'w')
-acc_csv = open('analysis/output/accuracy.csv', 'w')
+tokenizer_f1_csv = open('analysis/output/tokenizer_f1.csv', 'w')
+tokenizer_acc_csv = open('analysis/output/tokenizer_accuracy.csv', 'w')
 
-acc_csv.writelines('tokenizer, train_size, accuracy\n')
-f1_csv.writelines('tokenizer, train_size, f1\n')
+tokenizer_acc_csv.writelines('tokenizer, train_size, accuracy\n')
+tokenizer_f1_csv.writelines('tokenizer, train_size, f1\n')
 
-for keys in tokenizers.keys():
-    tokenizer = tokenizers[keys]
+for keys in various_tokenizers.keys():
+    print(keys)
+    tokenizer = various_tokenizers[keys]
 
     for train_size in train_sizes:
         ss = sklearn.model_selection.ShuffleSplit(n_splits=10, train_size=(train_size / 100), test_size=None, random_state=42)
