@@ -79,7 +79,7 @@ for keys in various_tokenizers.keys():
             X_train_counts = vect.fit_transform(X_train)
             tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
             X_train_tf = tf_transformer.transform(X_train_counts)
-            clf = sklearn.svm.LinearSVC().fit(X_train_tf, y_train)
+            clf = sklearn.linear_model.LogisticRegression().fit(X_train_tf, y_train)
 
             X_test_counts = vect.transform(X_test)
             X_test_tfidf = tf_transformer.transform(X_test_counts)
