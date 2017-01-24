@@ -21,6 +21,45 @@ def get_dataset():
     return x, y
 
 
+def test_tokenizer(X, y, tokenizer, train_size):
+    ss = sklearn.model_selection.ShuffleSplit(n_splits=10, train_size=(train_size / 100), test_size=None,
+                                              random_state=42)
+    total_train_error = 0.0
+    total_test_error = 0.0
+    total_f1 = 0.0
+    runs = 0
+    for train, test in ss.split(X, y):
+        X_train = np.array(X)[train]
+        y_train = y[train]
+
+        X_test = np.array(X)[test]
+        y_test = y[test]
+
+        vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=tokenizer)
+        X_train_counts = vect.fit_transform(X_train)
+        tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
+        X_train_tfidf = tf_transformer.transform(X_train_counts)
+        clf = sklearn.linear_model.LogisticRegression().fit(X_train_tfidf, y_train)
+
+        predicted = clf.predict(X_train_tfidf)
+        train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
+        total_train_error += train_error
+
+        X_test_counts = vect.transform(X_test)
+        X_test_tfidf = tf_transformer.transform(X_test_counts)
+        predicted = clf.predict(X_test_tfidf)
+        test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
+        total_test_error += test_error
+
+        total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
+        runs += 1
+    average_train_error = total_train_error / runs
+    average_test_error = total_test_error / runs
+    average_f1 = total_f1 / runs
+
+    return average_train_error, average_test_error, average_f1
+
+
 class WhitespaceTokenizer(object):
     def __init__(self):
         pass
@@ -56,48 +95,23 @@ X, y = get_dataset()
 tokenizer_f1_csv = open('analysis/output/tokenizer_f1.csv', 'w')
 tokenizer_acc_csv = open('analysis/output/tokenizer_accuracy.csv', 'w')
 
-tokenizer_acc_csv.writelines('tokenizer, train_size, accuracy\n')
+tokenizer_acc_csv.writelines('tokenizer, train_size, train_error, test_error\n')
 tokenizer_f1_csv.writelines('tokenizer, train_size, f1\n')
+
 
 for keys in various_tokenizers.keys():
     print(keys)
-    tokenizer = various_tokenizers[keys]
+    tok = various_tokenizers[keys]
 
-    for train_size in train_sizes:
-        ss = sklearn.model_selection.ShuffleSplit(n_splits=10, train_size=(train_size / 100), test_size=None, random_state=42)
-        total_score = 0.0
-        total_f1 = 0.0
-        runs = 0
-        for train, test in ss.split(X, y):
-            X_train = np.array(X)[train]
-            y_train = y[train]
-
-            X_test = np.array(X)[test]
-            y_test = y[test]
-
-            vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=tokenizer)
-            X_train_counts = vect.fit_transform(X_train)
-            tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
-            X_train_tf = tf_transformer.transform(X_train_counts)
-            clf = sklearn.linear_model.LogisticRegression().fit(X_train_tf, y_train)
-
-            X_test_counts = vect.transform(X_test)
-            X_test_tfidf = tf_transformer.transform(X_test_counts)
-            predicted = clf.predict(X_test_tfidf)
-
-            total_score += sklearn.metrics.accuracy_score(y_test, predicted)
-            total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
-            runs += 1
-
-        tokenizer_acc_csv.write('{}, {}%, {:.3f}\n'.format(keys, train_size, total_score / runs))
-        tokenizer_f1_csv.write('{}, {}%, {:.3f}\n'.format(keys, train_size, total_f1 / runs))
+    for size in train_sizes:
+        average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tok, size)
+        tokenizer_acc_csv.write('{}, {}%, {:.3f}, {:.3f}\n'.format(keys, size, average_train_error, average_test_error))
+        tokenizer_f1_csv.write('{}, {}%, {:.3f}\n'.format(keys, size, average_f1))
 
 tokenizer_f1_csv.close()
 tokenizer_acc_csv.close()
 
-
 exit(0)
-
 
 class SkipgramSentimentTokenizer(object):
     def __init__(self, n, k, negate=False):
@@ -147,44 +161,17 @@ features_extraction = {
 features_acc_csv = open('analysis/output/features_accuracy.csv', 'w')
 features_f1_csv = open('analysis/output/features_f1.csv', 'w')
 
-features_acc_csv.writelines('features, train_size, accuracy\n')
+features_acc_csv.writelines('features, train_size, train_error, test_error\n')
 features_f1_csv.writelines('features, train_size, f1\n')
 
 for keys in features_extraction.keys():
     print(keys)
-    tokenizer = features_extraction[keys]
+    tok = features_extraction[keys]
 
-    for train_size in train_sizes:
-        ss = sklearn.model_selection.ShuffleSplit(n_splits=10, train_size=(train_size / 100), test_size=None, random_state=42)
-        total_score = 0.0
-        total_f1 = 0.0
-        runs = 0
-        for train, test in ss.split(X, y):
-            X_train = np.array(X)[train]
-            y_train = y[train]
-
-            X_test = np.array(X)[test]
-            y_test = y[test]
-
-            vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=tokenizer)
-            X_train_counts = vect.fit_transform(X_train)
-            tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
-            X_train_tf = tf_transformer.transform(X_train_counts)
-            clf = sklearn.linear_model.LogisticRegression(max_iter=500, solver='sag', n_jobs=-1).fit(X_train_tf, y_train)
-
-            X_test_counts = vect.transform(X_test)
-            X_test_tfidf = tf_transformer.transform(X_test_counts)
-            predicted = clf.predict(X_test_tfidf)
-
-            print('{:.3f},{:.3f}'.format(clf.score(X_train_tf, y_train), clf.score(X_test_tfidf, y_test)))
-
-            total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
-            total_score += sklearn.metrics.accuracy_score(y_test, predicted)
-            runs += 1
-
-        features_acc_csv.write('{}, {}%, {:.3f}\n'.format(keys, train_size, total_score / runs))
-        print(total_score / runs)
-        features_f1_csv.write('{}, {}%, {:.3f}\n'.format(keys, train_size, total_f1 / runs))
+    for size in train_sizes:
+        average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tok, size)
+        features_acc_csv.write('{}, {}%, {:.3f}, {:.3f}\n'.format(keys, size, average_train_error, average_test_error))
+        features_f1_csv.write('{}, {}%, {:.3f}\n'.format(keys, size, average_f1))
 
 features_acc_csv.close()
 features_f1_csv.close()
