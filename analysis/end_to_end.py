@@ -21,7 +21,7 @@ def get_dataset():
     return x, y
 
 
-def test_tokenizer(X, y, tokenizer, train_size):
+def test_tokenizer(X, y, tokenizer, train_size, k_best):
     ss = sklearn.model_selection.ShuffleSplit(n_splits=10, train_size=(train_size / 100), test_size=None,
                                               random_state=42)
     total_train_error = 0.0
@@ -39,20 +39,27 @@ def test_tokenizer(X, y, tokenizer, train_size):
         X_train_counts = vect.fit_transform(X_train)
         tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
         X_train_tfidf = tf_transformer.transform(X_train_counts)
-        clf = sklearn.linear_model.LogisticRegression().fit(X_train_tfidf, y_train)
 
-        predicted = clf.predict(X_train_tfidf)
+        ch2 = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=k_best)
+        X_train_ch2 = ch2.fit_transform(X_train_tfidf, y_train)
+
+        clf = sklearn.linear_model.LogisticRegression().fit(X_train_ch2, y_train)
+
+        predicted = clf.predict(X_train_ch2)
         train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
         total_train_error += train_error
 
         X_test_counts = vect.transform(X_test)
         X_test_tfidf = tf_transformer.transform(X_test_counts)
-        predicted = clf.predict(X_test_tfidf)
+        X_test_ch2 = ch2.fit_transform(X_test_tfidf, y_test)
+        predicted = clf.predict(X_test_ch2)
+
         test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
         total_test_error += test_error
 
         total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
         runs += 1
+
     average_train_error = total_train_error / runs
     average_test_error = total_test_error / runs
     average_f1 = total_f1 / runs
@@ -85,28 +92,34 @@ class SentimentTokenizer(object):
 
 
 various_tokenizers = {
-    'Whitespace': WhitespaceTokenizer(),
+    # 'Whitespace': WhitespaceTokenizer(),
     'Treebank-style': TreebankTokenizer(),
     'Sentiment-aware': SentimentTokenizer()
 }
-train_sizes = list(range(10, 100, 10))
+train_sizes = list(range(60, 100, 10))
+k_sizes = list(range(100, 5000, 100))
 X, y = get_dataset()
 
 tokenizer_f1_csv = open('analysis/output/tokenizer_f1.csv', 'w')
 tokenizer_acc_csv = open('analysis/output/tokenizer_accuracy.csv', 'w')
 
-tokenizer_acc_csv.writelines('tokenizer, train_size, train_error, test_error\n')
-tokenizer_f1_csv.writelines('tokenizer, train_size, f1\n')
+tokenizer_acc_csv.writelines('tokenizer, train_size, k, train_error, test_error\n')
+tokenizer_f1_csv.writelines('tokenizer, train_size, k, f1\n')
 
 
 for keys in various_tokenizers.keys():
-    print(keys)
+    print('key={}'.format(keys))
     tok = various_tokenizers[keys]
 
     for size in train_sizes:
-        average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tok, size)
-        tokenizer_acc_csv.write('{}, {}%, {:.3f}, {:.3f}\n'.format(keys, size, average_train_error, average_test_error))
-        tokenizer_f1_csv.write('{}, {}%, {:.3f}\n'.format(keys, size, average_f1))
+        print('train_size={}'.format(size))
+
+        for k in k_sizes:
+            print('k={}'.format(k))
+
+            average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tok, size, k)
+            tokenizer_acc_csv.write('{}, {}, {}, {:.3f}, {:.3f}\n'.format(keys, size, k, average_train_error, average_test_error))
+            tokenizer_f1_csv.write('{}, {}, {}, {:.3f}\n'.format(keys, size, k, average_f1))
 
 tokenizer_f1_csv.close()
 tokenizer_acc_csv.close()
