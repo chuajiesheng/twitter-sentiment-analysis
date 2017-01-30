@@ -44,9 +44,7 @@ def test_tokenizer(X, y, tokenizer, train_size, k_best):
         X_train_tfidf = tf_transformer.transform(X_train_counts)
 
         max_k = X_train_tfidf.shape[1]
-        print('comparing k_best={} ({}), with max_k={} ({})'.format(k_best, type(k_best), max_k, type(max_k)))
-        if int(k_best) > max_k:
-            print('k_best={}, therefore k_best=all'.format(k_best))
+        if k_best != 'all' and k_best > max_k:
             k_best = 'all'
 
         ch2 = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=k_best)
