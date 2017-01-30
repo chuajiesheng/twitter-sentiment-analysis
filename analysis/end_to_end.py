@@ -43,6 +43,11 @@ def test_tokenizer(X, y, tokenizer, train_size, k_best):
         tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(X_train_counts)
         X_train_tfidf = tf_transformer.transform(X_train_counts)
 
+        max_k = X_train_tfidf.shape[1]
+        if k_best > max_k:
+            print('k_best={}, therefore k_best=all'.format(k_best))
+            k_best = 'all'
+
         ch2 = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=k_best)
         X_train_ch2 = ch2.fit_transform(X_train_tfidf, y_train)
 
