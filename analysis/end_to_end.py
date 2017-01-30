@@ -63,11 +63,7 @@ def test_tokenizer(X, y, tokenizer, train_size, k_best):
         total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
         runs += 1
 
-    average_train_error = total_train_error / runs
-    average_test_error = total_test_error / runs
-    average_f1 = total_f1 / runs
-
-    return average_train_error, average_test_error, average_f1
+    return total_train_error / runs, total_test_error / runs, total_f1 / runs
 
 
 class WhitespaceTokenizer(object):
