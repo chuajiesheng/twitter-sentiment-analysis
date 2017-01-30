@@ -51,7 +51,7 @@ def test_tokenizer(X, y, tokenizer, train_size, k_best):
 
         X_test_counts = vect.transform(X_test)
         X_test_tfidf = tf_transformer.transform(X_test_counts)
-        X_test_ch2 = ch2.fit_transform(X_test_tfidf, y_test)
+        X_test_ch2 = ch2.transform(X_test_tfidf)
         predicted = clf.predict(X_test_ch2)
 
         test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
