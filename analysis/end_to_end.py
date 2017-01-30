@@ -120,9 +120,8 @@ def train_and_output(X, y, tokenizer, train_size, k_best):
         f1_file.write('{}, {}, {}, {:.3f}\n'.format(tokenizer_name, train_size, k_best, average_f1))
         f1_file.flush()
 
-print('pool={}'.format(multiprocessing.cpu_count()))
 combi = itertools.product(various_tokenizers.values(), train_sizes, k_sizes)
-with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+with multiprocessing.Pool() as pool:
     p = pool.starmap(functools.partial(train_and_output, X, y), combi)
 
 exit(0)
