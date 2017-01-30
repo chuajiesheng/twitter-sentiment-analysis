@@ -121,7 +121,7 @@ def train_and_output(X, y, tokenizer, train_size, k_best):
     with open('analysis/output/tokenizer_accuracy.csv', 'a') as acc_file:
         acc_file.write('{}, {}, {}, {:.3f}, {:.3f}\n'.format(tokenizer_name, train_size, k_best, average_train_error, average_test_error))
         acc_file.flush()
-    with open('analysis/output/tokenizer_f1.csv', 'w') as f1_file:
+    with open('analysis/output/tokenizer_f1.csv', 'a') as f1_file:
         f1_file.write('{}, {}, {}, {:.3f}\n'.format(tokenizer_name, train_size, k_best, average_f1))
         f1_file.flush()
 
