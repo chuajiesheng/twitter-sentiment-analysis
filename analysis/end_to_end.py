@@ -44,7 +44,7 @@ def test_tokenizer(X, y, tokenizer, train_size, k_best):
         X_train_tfidf = tf_transformer.transform(X_train_counts)
 
         max_k = X_train_tfidf.shape[1]
-        if k_best > max_k:
+        if int(k_best) > max_k:
             print('k_best={}, therefore k_best=all'.format(k_best))
             k_best = 'all'
 
