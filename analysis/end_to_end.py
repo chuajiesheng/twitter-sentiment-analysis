@@ -92,12 +92,12 @@ class SentimentTokenizer(object):
 
 
 various_tokenizers = {
-    # 'Whitespace': WhitespaceTokenizer(),
+    'Whitespace': WhitespaceTokenizer(),
     'Treebank-style': TreebankTokenizer(),
     'Sentiment-aware': SentimentTokenizer()
 }
-train_sizes = list(range(60, 100, 10))
-k_sizes = list(range(100, 5000, 100))
+train_sizes = list(range(10, 100, 10))
+k_sizes = [100]
 X, y = get_dataset()
 
 tokenizer_f1_csv = open('analysis/output/tokenizer_f1.csv', 'w')
