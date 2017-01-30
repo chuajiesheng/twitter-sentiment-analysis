@@ -2,6 +2,9 @@ import numpy as np
 import nltk
 import sklearn
 import tokenizers
+import multiprocessing
+import itertools
+import functools
 
 
 def get_dataset():
@@ -100,31 +103,34 @@ train_sizes = list(range(60, 100, 10))
 k_sizes = list(range(100, 10000, 200))
 X, y = get_dataset()
 
-tokenizer_f1_csv = open('analysis/output/tokenizer_f1.csv', 'w')
-tokenizer_acc_csv = open('analysis/output/tokenizer_accuracy.csv', 'w')
+TOKENIZER_F1_FILE = 'analysis/output/tokenizer_f1.csv'
+TOKENIZER_ACC_FILE = 'analysis/output/tokenizer_accuracy.csv'
 
-tokenizer_acc_csv.writelines('tokenizer, train_size, k, train_error, test_error\n')
-tokenizer_f1_csv.writelines('tokenizer, train_size, k, f1\n')
+with open(TOKENIZER_F1_FILE, 'w') as f:
+    f.writelines('tokenizer, train_size, k, f1\n')
+
+with open(TOKENIZER_ACC_FILE, 'w') as f:
+    f.writelines('tokenizer, train_size, k, train_error, test_error\n')
 
 
-for keys in various_tokenizers.keys():
-    print('key={}'.format(keys))
-    tok = various_tokenizers[keys]
+def train_and_output(X, y, tokenizer, train_size, k_best):
+    tokenizer_name = tokenizer.__class__.__name__
+    print('tokenizer={}, train_size={}, k_best={}'.format(tokenizer_name, train_size, k_best))
+    average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tokenizer, train_size, k_best)
+    with open('analysis/output/tokenizer_accuracy.csv', 'a') as acc_file:
+        acc_file.write('{}, {}, {}, {:.3f}, {:.3f}\n'.format(tokenizer_name, train_size, k_best, average_train_error, average_test_error))
+        acc_file.flush()
+    with open('analysis/output/tokenizer_f1.csv', 'w') as f1_file:
+        f1_file.write('{}, {}, {}, {:.3f}\n'.format(tokenizer_name, train_size, k, average_f1))
+        f1_file.flush()
 
-    for size in train_sizes:
-        print('train_size={}'.format(size))
-
-        for k in k_sizes:
-            print('k={}'.format(k))
-
-            average_train_error, average_test_error, average_f1 = test_tokenizer(X, y, tok, size, k)
-            tokenizer_acc_csv.write('{}, {}, {}, {:.3f}, {:.3f}\n'.format(keys, size, k, average_train_error, average_test_error))
-            tokenizer_f1_csv.write('{}, {}, {}, {:.3f}\n'.format(keys, size, k, average_f1))
-
-tokenizer_f1_csv.close()
-tokenizer_acc_csv.close()
+print('pool={}'.format(multiprocessing.cpu_count()))
+combi = itertools.product(various_tokenizers.values(), train_sizes, k_sizes)
+with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+    p = pool.starmap(functools.partial(train_and_output, X, y), combi)
 
 exit(0)
+
 
 class SkipgramSentimentTokenizer(object):
     def __init__(self, n, k, negate=False):
