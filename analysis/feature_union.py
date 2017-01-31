@@ -50,13 +50,13 @@ for train, test in ss.split(x_text):
     x_liwc_test = x_liwc.ix[test]
     y_test = y.ix[test]
 
-    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer()).fit(x_text_train)
-    x_text_train_vect = vect.transform(x_text_train)
+    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
+    x_text_train_vect = vect.fit_transform(x_text_train)
 
-    tfidf = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False).fit(x_text_train_vect)
-    x_text_train_tfidf = tfidf.transform(x_text_train_vect)
+    tfidf = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)
+    x_text_train_tfidf = tfidf.fit_transform(x_text_train_vect)
 
-    mutual_info = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST).fit(x_text_train_tfidf, y_train)
+    mutual_info = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST)
     x_text_train_k_best = mutual_info.fit_transform(x_text_train_tfidf, y_train)
 
     all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
@@ -67,7 +67,7 @@ for train, test in ss.split(x_text):
 
     x_text_test_vect = vect.transform(x_text_test)
     x_text_test_tfidf = tfidf.transform(x_text_test_vect)
-    x_text_test_k_best = mutual_info.fit_transform(x_text_test_tfidf, y_test)
+    x_text_test_k_best = mutual_info.transform(x_text_test_tfidf)
     all_test_features = scipy.sparse.hstack((x_text_test_k_best, x_liwc_test)).A
     predicted = clf.predict(all_test_features)
     test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
