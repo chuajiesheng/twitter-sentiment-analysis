@@ -73,3 +73,31 @@ Confusion matrix for one of the round:
  [ 75 183]]
 ```
 But it place too much irrelevant tweets to relevant, thus the low performance.
+
+## SVM + more LWIC values
+
+- SGDClassifier
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.610
+[*] Average Train Error: 0.390
+[*] Average Test Error: 0.389
+[*] Average F1: 0.483
+[*] Average MCC: 0.117
+```
+
+This model is not stable. It jumps between good and bad.
+Example:
+```
+[[226 819]
+ [ 42 216]]
+ 
+[[1037    8]
+ [ 253    5]]
+```
