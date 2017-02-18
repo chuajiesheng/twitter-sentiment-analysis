@@ -13,7 +13,7 @@ This set of result is done with a 80% completed labels from the research assista
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic, Clout, Authentic, Tone, affect, posemo, negemo, anx, anger, sad
 
 ```
@@ -34,7 +34,7 @@ Confusion matrix shows that it performed correctly 50% of the time.
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
@@ -55,7 +55,7 @@ i.e. it say that a relevant is relevant (about 2 more than base)
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
@@ -81,7 +81,7 @@ But it place too much irrelevant tweets to relevant, thus the low performance.
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
@@ -109,7 +109,7 @@ Example:
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
@@ -137,7 +137,7 @@ The generally confusion matrix is this:
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
@@ -219,7 +219,7 @@ The average MCC increased but the overfitting problem still exist.
 - StratifiedShuffleSplit
     - train=80%
     - test=20%
-    -cross_validation=10
+    - cross_validation=10
 - LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
 
 ```
