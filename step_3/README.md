@@ -148,6 +148,26 @@ The generally confusion matrix is this:
 [*] Average MCC: 0.627
 ```
 
+## Downsampling + RandomForestClassifier + more LWIC values
+
+- RandomForestClassifier
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.986
+[*] Average Train Error: 0.014
+[*] Average Test Error: 0.229
+[*] Average F1: 0.769
+[*] Average MCC: 0.548
+```
+
+Test error is a bit high, it seems that the data from the training set is not fitted fully.
+
 ## Downsampling + RandomForestClassifier (more estimator) + more LWIC values
 
 - RandomForestClassifier
@@ -168,7 +188,8 @@ The generally confusion matrix is this:
 ```
 
 This classification is decent but it is starting to overfit with the test error and train error gap increaing to `0.19`.
-The overfitting started partly because the small training and testing size but too much emphasing on the small dataset.
+But the gap with a 50 estimators seems to be lower that one with 10 estimators.
+The overfitting started partly because the small training and testing size.
 
 ## Downsampling + RandomForestClassifier (even more estimator) + more LWIC values
 
