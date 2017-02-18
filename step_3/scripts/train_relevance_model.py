@@ -16,7 +16,7 @@ K_BEST = 100
 dataset = pd.read_excel(INPUT_FILE)
 
 x_text = dataset['body']
-x_liwc = dataset[['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo', 'anx', 'anger', 'sad']]
+x_liwc = dataset[['Analytic','Clout','Authentic','Tone','affect','posemo','negemo','anx','anger','sad','social','family','friend','female','male','percept','see','hear','feel','focuspast','focuspresent','focusfuture','relativ','motion','space','time','work','leisure','home','money','relig','death']]
 y = dataset['relevance']
 
 total_train_error = 0.0
