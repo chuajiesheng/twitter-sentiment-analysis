@@ -27,7 +27,7 @@ This set of result is done with a 80% completed labels from the research assista
 This model performed so-so when trying to decide if it is not relevant (0-label) when given one.
 Confusion matrix shows that it performed correctly 50% of the time.
 
-## Base + more LWIC values
+## Base + more LIWC values
 
 - LogisticRegression
 - 100-best features using mutual information
@@ -48,7 +48,7 @@ Confusion matrix shows that it performed correctly 50% of the time.
 This model performed similar to the base model, except slightly better at determine if it is relevant when give one.
 i.e. it say that a relevant is relevant (about 2 more than base) 
 
-## MultinomialNB + more LWIC values
+## MultinomialNB + more LIWC values
 
 - MultinomialNB
 - 100-best features using mutual information
@@ -74,7 +74,7 @@ Confusion matrix for one of the round:
 ```
 But it place too much irrelevant tweets to relevant, thus the low performance.
 
-## SVM + more LWIC values
+## SVM + more LIWC values
 
 - SGDClassifier
 - 100-best features using mutual information
@@ -102,7 +102,7 @@ Example:
  [ 253    5]]
 ```
 
-## RandomForestClassifier + more LWIC values
+## RandomForestClassifier + more LIWC values
 
 - RandomForestClassifier
 - 100-best features using mutual information
@@ -129,7 +129,7 @@ The generally confusion matrix is this:
  [ 108  150]]
 ```
 
-## RandomForestClassifier (more estimator) + more LWIC values
+## RandomForestClassifier (more estimator) + more LIWC values
 
 - RandomForestClassifier
     - n_estimators=50
@@ -148,7 +148,7 @@ The generally confusion matrix is this:
 [*] Average MCC: 0.627
 ```
 
-## Downsampling + RandomForestClassifier + more LWIC values
+## Downsampling + RandomForestClassifier + more LIWC values
 
 - RandomForestClassifier
 - 100-best features using mutual information
@@ -168,7 +168,7 @@ The generally confusion matrix is this:
 
 Test error is a bit high, it seems that the data from the training set is not fitted fully.
 
-## Downsampling + RandomForestClassifier (more estimator) + more LWIC values
+## Downsampling + RandomForestClassifier (more estimator) + more LIWC values
 
 - RandomForestClassifier
     - n_estimators=50
@@ -191,7 +191,7 @@ This classification is decent but it is starting to overfit with the test error 
 But the gap with a 50 estimators seems to be lower that one with 10 estimators.
 The overfitting started partly because the small training and testing size.
 
-## Downsampling + RandomForestClassifier (even more estimator) + more LWIC values
+## Downsampling + RandomForestClassifier (even more estimator) + more LIWC values
 
 - RandomForestClassifier
     - n_estimators=500
