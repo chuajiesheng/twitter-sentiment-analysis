@@ -128,3 +128,65 @@ The generally confusion matrix is this:
 [[1014   31]
  [ 108  150]]
 ```
+
+## RandomForestClassifier (more estimator) + more LWIC values
+
+- RandomForestClassifier
+    - n_estimators=50
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.997
+[*] Average Train Error: 0.003
+[*] Average Test Error: 0.109
+[*] Average F1: 0.804
+[*] Average MCC: 0.627
+```
+
+## Downsampling + RandomForestClassifier (more estimator) + more LWIC values
+
+- RandomForestClassifier
+    - n_estimators=50
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.996
+[*] Average Train Error: 0.004
+[*] Average Test Error: 0.198
+[*] Average F1: 0.801
+[*] Average MCC: 0.610
+```
+
+This classification is decent but it is starting to overfit with the test error and train error gap increaing to `0.19`.
+The overfitting started partly because the small training and testing size but too much emphasing on the small dataset.
+
+## Downsampling + RandomForestClassifier (even more estimator) + more LWIC values
+
+- RandomForestClassifier
+    - n_estimators=500
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.998
+[*] Average Train Error: 0.002
+[*] Average Test Error: 0.192
+[*] Average F1: 0.807
+[*] Average MCC: 0.621
+```
+
+The average MCC increased but the overfitting problem still exist.

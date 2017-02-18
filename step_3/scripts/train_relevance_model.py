@@ -15,9 +15,16 @@ RANDOM_SEED = 42
 K_BEST = 100
 dataset = pd.read_excel(INPUT_FILE)
 
-x_text = dataset['body']
-x_liwc = dataset[['Analytic','Clout','Authentic','Tone','affect','posemo','negemo','anx','anger','sad','social','family','friend','female','male','percept','see','hear','feel','focuspast','focuspresent','focusfuture','relativ','motion','space','time','work','leisure','home','money','relig','death']]
-y = dataset['relevance']
+# re-sampling
+sample_size = sum(dataset.relevance == 1)
+y_false = dataset[dataset.relevance == 0].index
+random_y_false_indices = np.random.choice(y_false, sample_size, replace=False)
+
+indices = np.append(random_y_false_indices, np.array(dataset[dataset.relevance == 1].index))
+
+x_text = dataset.loc[indices]['body']
+x_liwc = dataset.loc[indices][['Analytic','Clout','Authentic','Tone','affect','posemo','negemo','anx','anger','sad','social','family','friend','female','male','percept','see','hear','feel','focuspast','focuspresent','focusfuture','relativ','motion','space','time','work','leisure','home','money','relig','death']]
+y = dataset.loc[indices]['relevance']
 
 total_train_error = 0.0
 total_test_error = 0.0
@@ -36,13 +43,13 @@ class TreebankTokenizer(object):
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
 for train, test in ss.split(x_text, y):
-    x_text_train = x_text.ix[train]
-    x_liwc_train = x_liwc.ix[train]
-    y_train = y.ix[train]
+    x_text_train = x_text.iloc[train]
+    x_liwc_train = x_liwc.iloc[train]
+    y_train = y.iloc[train]
 
-    x_text_test = x_text.ix[test]
-    x_liwc_test = x_liwc.ix[test]
-    y_test = y.ix[test]
+    x_text_test = x_text.iloc[test]
+    x_liwc_test = x_liwc.iloc[test]
+    y_test = y.iloc[test]
 
     vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
     x_text_train_vect = vect.fit_transform(x_text_train)
@@ -56,7 +63,7 @@ for train, test in ss.split(x_text, y):
     all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
 
     from sklearn.ensemble import *
-    clf = RandomForestClassifier().fit(all_train_features, y_train)
+    clf = RandomForestClassifier(n_estimators=500).fit(all_train_features, y_train)
     predicted = clf.predict(all_train_features)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
