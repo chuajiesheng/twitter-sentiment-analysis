@@ -63,9 +63,9 @@ for train, test in ss.split(x_text, y):
 
     all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
 
-    from sklearn.neural_network import *
+    from sklearn.ensemble import *
 
-    clf = MLPClassifier(random_state=RANDOM_SEED).fit(all_train_features, y_train)
+    clf = RandomForestClassifier(n_estimators=500).fit(all_train_features, y_train)
     predicted = clf.predict(all_train_features)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
