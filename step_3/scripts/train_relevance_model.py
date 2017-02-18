@@ -21,6 +21,8 @@ y = dataset['relevance']
 
 total_train_error = 0.0
 total_test_error = 0.0
+total_f1 = 0.0
+total_mcc = 0.0
 runs = 0
 
 
@@ -32,8 +34,8 @@ class TreebankTokenizer(object):
         return self.treebank_word_tokenize(doc)
 
 
-ss = sklearn.model_selection.ShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
-for train, test in ss.split(x_text):
+ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
+for train, test in ss.split(x_text, y):
     x_text_train = x_text.ix[train]
     x_liwc_train = x_liwc.ix[train]
     y_train = y.ix[train]
@@ -66,11 +68,17 @@ for train, test in ss.split(x_text):
 
     print('[{}] Accuracy: \t{}'.format(runs + 1, sklearn.metrics.accuracy_score(y_test, predicted)))
     print('[{}] Macro F1: \t{}'.format(runs + 1, sklearn.metrics.f1_score(y_test, predicted, average='macro')))
+    print('[{}] MCC: \t{}'.format(runs + 1, sklearn.metrics.matthews_corrcoef(y_test, predicted)))
+    print(sklearn.metrics.confusion_matrix(y_test, predicted))
 
     total_train_error += train_error
     total_test_error += test_error
+    total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
+    total_mcc += sklearn.metrics.matthews_corrcoef(y_test, predicted)
     runs += 1
 
-print("[*] Average Accuracy: %0.3f" % 1 - (total_train_error / runs))
+print("[*] Average Accuracy: %0.3f" % (1 - (total_train_error / runs)))
 print("[*] Average Train Error: %0.3f" % (total_train_error / runs))
 print("[*] Average Test Error: %0.3f" % (total_test_error / runs))
+print("[*] Average F1: %0.3f" % (total_f1 / runs))
+print("[*] Average MCC: %0.3f" % (total_mcc / runs))
