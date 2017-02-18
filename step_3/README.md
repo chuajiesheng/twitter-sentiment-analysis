@@ -211,3 +211,20 @@ The overfitting started partly because the small training and testing size.
 ```
 
 The average MCC increased but the overfitting problem still exist.
+
+## Downsampling + MLPClassifier (neural network) + more LIWC values
+
+- MLPClassifier
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Train Accuracy/Error: 	0.856	0.144
+[*] Average Test Accuracy/Error: 	0.747	0.253
+[*] Average F1: 			0.745
+[*] Average MCC: 			0.499
+```

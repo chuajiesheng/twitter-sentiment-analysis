@@ -26,6 +26,7 @@ x_text = dataset.loc[indices]['body']
 x_liwc = dataset.loc[indices][['Analytic','Clout','Authentic','Tone','affect','posemo','negemo','anx','anger','sad','social','family','friend','female','male','percept','see','hear','feel','focuspast','focuspresent','focusfuture','relativ','motion','space','time','work','leisure','home','money','relig','death']]
 y = dataset.loc[indices]['relevance']
 
+total_accuracy = 0.0
 total_train_error = 0.0
 total_test_error = 0.0
 total_f1 = 0.0
@@ -62,8 +63,9 @@ for train, test in ss.split(x_text, y):
 
     all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
 
-    from sklearn.ensemble import *
-    clf = RandomForestClassifier().fit(all_train_features, y_train)
+    from sklearn.neural_network import *
+
+    clf = MLPClassifier(random_state=RANDOM_SEED).fit(all_train_features, y_train)
     predicted = clf.predict(all_train_features)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
@@ -74,19 +76,20 @@ for train, test in ss.split(x_text, y):
     predicted = clf.predict(all_test_features)
     test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
 
-    print('[{}] Accuracy: \t{}'.format(runs + 1, sklearn.metrics.accuracy_score(y_test, predicted)))
-    print('[{}] Macro F1: \t{}'.format(runs + 1, sklearn.metrics.f1_score(y_test, predicted, average='macro')))
-    print('[{}] MCC: \t{}'.format(runs + 1, sklearn.metrics.matthews_corrcoef(y_test, predicted)))
+    print('[{}] Accuracy: \t{:.4f}'.format(runs + 1, sklearn.metrics.accuracy_score(y_test, predicted)))
+    print('[{}] Macro F1: \t{:.4f}'.format(runs + 1, sklearn.metrics.f1_score(y_test, predicted, average='macro')))
+    print('[{}] MCC: \t{:.4f}'.format(runs + 1, sklearn.metrics.matthews_corrcoef(y_test, predicted)))
     print(sklearn.metrics.confusion_matrix(y_test, predicted))
 
+    total_accuracy += sklearn.metrics.accuracy_score(y_test, predicted)
     total_train_error += train_error
     total_test_error += test_error
     total_f1 += sklearn.metrics.f1_score(y_test, predicted, average='macro')
     total_mcc += sklearn.metrics.matthews_corrcoef(y_test, predicted)
     runs += 1
 
-print("[*] Average Accuracy: %0.3f" % (1 - (total_train_error / runs)))
-print("[*] Average Train Error: %0.3f" % (total_train_error / runs))
-print("[*] Average Test Error: %0.3f" % (total_test_error / runs))
-print("[*] Average F1: %0.3f" % (total_f1 / runs))
-print("[*] Average MCC: %0.3f" % (total_mcc / runs))
+print('[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs,
+                                                                   total_train_error / runs))
+print('[*] Average Test Accuracy/Error: \t{:.3f}\t{:.3f}'.format(total_accuracy / runs, total_test_error / runs))
+print('[*] Average F1: \t\t\t{:.3f}'.format(total_f1 / runs))
+print('[*] Average MCC: \t\t\t{:.3f}'.format(total_mcc / runs))
