@@ -101,3 +101,30 @@ Example:
 [[1037    8]
  [ 253    5]]
 ```
+
+## RandomForestClassifier + more LWIC values
+
+- RandomForestClassifier
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    -cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad,social,family,friend,female,male,percept,see,hear,feel,focuspast,focuspresent,focusfuture,relativ,motion,space,time,work,leisure,home,money,relig,death
+
+```
+[*] Average Accuracy: 0.985
+[*] Average Train Error: 0.015
+[*] Average Test Error: 0.116
+[*] Average F1: 0.786
+[*] Average MCC: 0.598
+```
+
+This model give a generally high accuracy and slightly better MCC as compared to logistic regression.
+It achieve this by a better deciding that a irrelevant is irrelevant.
+
+The generally confusion matrix is this:
+```
+[[1014   31]
+ [ 108  150]]
+```

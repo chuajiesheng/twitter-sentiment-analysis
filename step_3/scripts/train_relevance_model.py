@@ -55,7 +55,8 @@ for train, test in ss.split(x_text, y):
 
     all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
 
-    clf = sklearn.linear_model.SGDClassifier().fit(all_train_features, y_train)
+    from sklearn.ensemble import *
+    clf = RandomForestClassifier().fit(all_train_features, y_train)
     predicted = clf.predict(all_train_features)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
