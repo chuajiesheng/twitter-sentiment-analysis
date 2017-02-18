@@ -152,9 +152,9 @@ The overfitting started partly because the small training and testing size.
 
 ```
 [*] Average Train Accuracy/Error: 	0.997	0.003
-[*] Average Test Accuracy/Error: 	0.821	0.179
-[*] Average F1: 			0.821
-[*] Average MCC: 			0.648
+[*] Average Test Accuracy/Error: 	0.811	0.189
+[*] Average F1: 			0.810
+[*] Average MCC: 			0.627
 ```
 
 The average MCC increased but the overfitting problem still exist.
