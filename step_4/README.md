@@ -39,3 +39,19 @@ Could be overfitting. Need to investigate more.
 [*] Average Test Accuracy/Error: 	0.674	0.326
 [*] Average F1: 			0.671
 ```
+## Downsampling + RandomForestClassifier + LIWC values + Subjectivity score
+
+- RandomForestClassifier
+    - n_estimator=500
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    - cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad
+
+```
+[*] Average Train Accuracy/Error: 	0.996	0.004
+[*] Average Test Accuracy/Error: 	0.703	0.297
+[*] Average F1: 			0.698
+```
