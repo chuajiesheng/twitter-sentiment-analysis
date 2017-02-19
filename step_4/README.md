@@ -23,3 +23,19 @@ This set of result is done with a 80% completed labels from the research assista
 
 Decent F1 but seems to have a gap between train and test error. 
 Could be overfitting. Need to investigate more.
+
+## Downsampling + RandomForestClassifier + LIWC values + Subjectivity score
+
+- RandomForestClassifier
+- 100-best features using mutual information
+- StratifiedShuffleSplit
+    - train=80%
+    - test=20%
+    - cross_validation=10
+- LIWC values: Analytic,Clout,Authentic,Tone,affect,posemo,negemo,anx,anger,sad
+
+```
+[*] Average Train Accuracy/Error: 	0.982	0.018
+[*] Average Test Accuracy/Error: 	0.674	0.326
+[*] Average F1: 			0.671
+```

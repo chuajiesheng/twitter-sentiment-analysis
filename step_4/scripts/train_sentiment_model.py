@@ -7,6 +7,8 @@ import itertools
 import functools
 import pandas as pd
 import scipy
+import os
+import shlex
 
 INPUT_FILE = './step_4/input/sentiment.xlsx'
 CV = 10
@@ -37,6 +39,51 @@ indices = np.append(random_negative_indices, [random_neutral_indices, random_pos
 x_text = dataset.loc[indices]['body']
 x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']]
 y = dataset.loc[indices]['sentiment']
+
+
+def read_and_parse_clues():
+    DEFAULT_FILENAME = os.getcwd() + os.sep + 'subjectivity_clues' + os.sep + 'subjclueslen1-HLTEMNLP05.tff'
+
+    lines = None
+    with open(DEFAULT_FILENAME, 'r') as f:
+        lines = f.readlines()
+
+    clues = dict()
+    for l in lines:
+        clue = dict(token.split('=') for token in shlex.split(l))
+        word = clue['word1']
+        clues[word] = clue
+
+    return clues
+
+
+def calculate_relevant(lexicons, sentence):
+    PRIORPOLARITY = {
+        'positive': 1,
+        'negative': -1,
+        'both': 0,
+        'neutral': 0
+    }
+
+    TYPE = {
+        'strongsubj': 2,
+        'weaksubj': 1
+    }
+
+    total_score = 0
+
+    for w in sentence.split(' '):
+        if w not in lexicons.keys():
+            continue
+
+        total_score += PRIORPOLARITY[lexicons[w]['priorpolarity']] * TYPE[lexicons[w]['type']]
+
+    return total_score
+
+
+lexicons = read_and_parse_clues()
+x_subjectivity = x_text.apply(lambda row: calculate_relevant(lexicons, row)).rename('subjectivity')
+x_liwc = pd.concat([x_liwc, x_subjectivity], axis=1)
 
 total_accuracy = 0.0
 total_train_error = 0.0
