@@ -81,9 +81,46 @@ def calculate_relevant(lexicons, sentence):
     return total_score
 
 
+def read_and_parse_word_clusters():
+    DEFAULT_FILENAME = os.getcwd() + os.sep + 'twitter_word_clusters' + os.sep + 'input' + os.sep + '50mpaths2.txt'
+
+    with open(DEFAULT_FILENAME, 'r') as f:
+        lines = f.readlines()
+
+    word_clusters = dict()
+    for l in lines:
+        tokens = l.split('\t')
+        cluster_path = tokens[0]
+        word = tokens[1]
+
+        word_clusters[word] = cluster_path
+
+    return word_clusters
+
+
+def tokenise(clusters, sentence):
+    vector = dict()
+
+    for w in sentence.split(' '):
+        if w in clusters:
+            path = clusters[w]
+            if path in vector:
+                vector[path] += 1
+            else:
+                vector[path] = 1
+
+    return vector
+
+
 lexicons = read_and_parse_clues()
 x_subjectivity = x_text.apply(lambda row: calculate_relevant(lexicons, row)).rename('subjectivity')
-x_features = pd.concat([x_liwc, x_subjectivity], axis=1)
+
+clusters = read_and_parse_word_clusters()
+dict_vectorizer = sklearn.feature_extraction.DictVectorizer()
+x_clusters_dict = x_text.apply(lambda row: tokenise(clusters, row)).rename('word_clusters')
+x_word_clusters = dict_vectorizer.fit_transform(x_clusters_dict)
+
+x_features = pd.concat([x_liwc.reset_index(), x_subjectivity.reset_index(), pd.DataFrame(x_word_clusters.todense())], axis=1)
 
 total_accuracy = 0.0
 total_train_error = 0.0
