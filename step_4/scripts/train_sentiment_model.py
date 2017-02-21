@@ -36,9 +36,9 @@ random_neutral_indices = np.random.choice(neutral_dataset, sample_size, replace=
 random_positive_indices = np.random.choice(positive_dataset, sample_size, replace=False)
 indices = np.append(random_negative_indices, [random_neutral_indices, random_positive_indices])
 
-x_text = dataset.loc[indices]['body']
-x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']]
-y = dataset.loc[indices]['sentiment']
+x_text = dataset.loc[indices]['body'].reset_index(drop=True)
+x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
+y = dataset.loc[indices]['sentiment'].reset_index(drop=True)
 
 
 def read_and_parse_clues():
@@ -120,7 +120,7 @@ dict_vectorizer = sklearn.feature_extraction.DictVectorizer()
 x_clusters_dict = x_text.apply(lambda row: tokenise(clusters, row)).rename('word_clusters')
 x_word_clusters = dict_vectorizer.fit_transform(x_clusters_dict)
 
-x_features = pd.concat([x_liwc.reset_index(), x_subjectivity.reset_index(), pd.DataFrame(x_word_clusters.todense())], axis=1)
+x_features = pd.concat([x_liwc, x_subjectivity, pd.DataFrame(x_word_clusters.todense())], axis=1)
 
 total_accuracy = 0.0
 total_train_error = 0.0
@@ -139,13 +139,13 @@ class TreebankTokenizer(object):
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
 for train, test in ss.split(x_text, y):
-    x_text_train = x_text.iloc[train]
-    x_liwc_train = x_features.iloc[train]
-    y_train = y.iloc[train]
+    x_text_train = x_text.loc[train]
+    x_features_train = x_features.loc[train]
+    y_train = y.loc[train]
 
-    x_text_test = x_text.iloc[test]
-    x_liwc_test = x_features.iloc[test]
-    y_test = y.iloc[test]
+    x_text_test = x_text.loc[test]
+    x_features_test = x_features.loc[test]
+    y_test = y.loc[test]
 
     vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
     x_text_train_vect = vect.fit_transform(x_text_train)
@@ -156,7 +156,7 @@ for train, test in ss.split(x_text, y):
     mutual_info = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST)
     x_text_train_k_best = mutual_info.fit_transform(x_text_train_tfidf, y_train)
 
-    all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
+    all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_features_train)).A
 
     from sklearn.ensemble import *
 
@@ -167,7 +167,7 @@ for train, test in ss.split(x_text, y):
     x_text_test_vect = vect.transform(x_text_test)
     x_text_test_tfidf = tfidf.transform(x_text_test_vect)
     x_text_test_k_best = mutual_info.transform(x_text_test_tfidf)
-    all_test_features = scipy.sparse.hstack((x_text_test_k_best, x_liwc_test)).A
+    all_test_features = scipy.sparse.hstack((x_text_test_k_best, x_features_test)).A
     predicted = clf.predict(all_test_features)
     test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
 
