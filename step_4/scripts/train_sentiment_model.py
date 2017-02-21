@@ -83,7 +83,7 @@ def calculate_relevant(lexicons, sentence):
 
 lexicons = read_and_parse_clues()
 x_subjectivity = x_text.apply(lambda row: calculate_relevant(lexicons, row)).rename('subjectivity')
-x_liwc = pd.concat([x_liwc, x_subjectivity], axis=1)
+x_features = pd.concat([x_liwc, x_subjectivity], axis=1)
 
 total_accuracy = 0.0
 total_train_error = 0.0
@@ -103,11 +103,11 @@ class TreebankTokenizer(object):
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
 for train, test in ss.split(x_text, y):
     x_text_train = x_text.iloc[train]
-    x_liwc_train = x_liwc.iloc[train]
+    x_liwc_train = x_features.iloc[train]
     y_train = y.iloc[train]
 
     x_text_test = x_text.iloc[test]
-    x_liwc_test = x_liwc.iloc[test]
+    x_liwc_test = x_features.iloc[test]
     y_test = y.iloc[test]
 
     vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
