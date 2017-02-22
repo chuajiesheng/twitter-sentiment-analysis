@@ -15,15 +15,13 @@ CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
 K_BEST = 100
+SAMPLE_SIZE = 1500
 dataset = pd.read_excel(INPUT_FILE)
 
 # re-sampling
 negative_size = sum(dataset.sentiment == -1)
 neutral_size = sum(dataset.sentiment == 0)
 positive_size = sum(dataset.sentiment == 1)
-print('Samples: \t{}\t{}\t{}'.format(negative_size, neutral_size, positive_size))
-
-sample_size = min([negative_size, neutral_size, positive_size])
 
 np.random.seed(RANDOM_SEED)
 
@@ -31,10 +29,12 @@ negative_dataset = dataset[dataset.sentiment == -1].index
 neutral_dataset = dataset[dataset.sentiment == 0].index
 positive_dataset = dataset[dataset.sentiment == 1].index
 
-random_negative_indices = np.random.choice(negative_dataset, sample_size, replace=False)
-random_neutral_indices = np.random.choice(neutral_dataset, sample_size, replace=False)
-random_positive_indices = np.random.choice(positive_dataset, sample_size, replace=False)
+random_negative_indices = np.random.choice(negative_dataset, SAMPLE_SIZE, replace=False)
+random_neutral_indices = np.random.choice(neutral_dataset, SAMPLE_SIZE, replace=False)
+random_positive_indices = np.random.choice(positive_dataset, SAMPLE_SIZE, replace=False)
 indices = np.append(random_negative_indices, [random_neutral_indices, random_positive_indices])
+print('Total data size: {}'.format(len(indices)))
+
 
 x_text = dataset.loc[indices]['body'].reset_index(drop=True)
 x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
