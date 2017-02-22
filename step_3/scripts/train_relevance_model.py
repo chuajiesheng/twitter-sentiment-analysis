@@ -1,7 +1,6 @@
 import numpy as np
 import nltk
 import sklearn
-import tokenizers
 import multiprocessing
 import itertools
 import functools
@@ -37,12 +36,12 @@ total_mcc = 0.0
 runs = 0
 
 
-class SentimentTokenizer(object):
+class TreebankTokenizer(object):
     def __init__(self):
-        self.sentiment_aware_tokenize = tokenizers.happy_tokenizer.Tokenizer().tokenize
+        self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
 
     def __call__(self, doc):
-        return self.sentiment_aware_tokenize(doc)
+        return self.treebank_word_tokenize(doc)
 
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
@@ -53,20 +52,24 @@ for train, test in ss.split(x_text, y):
     x_text_test = x_text.loc[test]
     y_test = y.loc[test]
 
-    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=SentimentTokenizer())
+    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
     x_text_train_vect = vect.fit_transform(x_text_train)
 
     tfidf = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)
     x_text_train_tfidf = tfidf.fit_transform(x_text_train_vect)
 
+    mutual_info = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST)
+    x_text_train_k_best = mutual_info.fit_transform(x_text_train_tfidf, y_train)
+
     from sklearn.naive_bayes import MultinomialNB
-    clf = MultinomialNB().fit(x_text_train_tfidf, y_train)
-    predicted = clf.predict(x_text_train_tfidf)
+    clf = MultinomialNB().fit(x_text_train_k_best, y_train)
+    predicted = clf.predict(x_text_train_k_best)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
     x_text_test_vect = vect.transform(x_text_test)
     x_text_test_tfidf = tfidf.transform(x_text_test_vect)
-    predicted = clf.predict(x_text_test_tfidf)
+    x_text_test_k_best = mutual_info.transform(x_text_test_tfidf)
+    predicted = clf.predict(x_text_test_k_best)
     test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
 
     print('[{}] Accuracy: \t{:.4f}'.format(runs + 1, sklearn.metrics.accuracy_score(y_test, predicted)))

@@ -56,3 +56,31 @@ Question:
 
 There is a 0.05 to 0.07 gap between our training error and testing error. Could we reduce this gap by reducing overfitting in our model?
 E.g. using mutal information to select top 100 features?
+
+### Top 100 features using mutual information
+
+Experiment setup:
+
+    - Naive Bayers classifier (with default values)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - Treebank tokenzier
+    - Top 100 features using mutual information
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.769	0.231
+[*] Average Test Accuracy/Error: 	0.756	0.244
+[*] Average F1: 			0.755
+[*] Average MCC: 			0.519
+```
+
+Using top 100 features selected via mutual information, we are able to reduce the gap of the train-test error to 0.1.
+But this trade-off reduce our Accuracy, F1 and MCC by 0.03 to 0.05.
+To reduce over-fitting and reduce our feature size, we decide to take this approach.
+
+Question:
+
+If we include LIWC features, will our classifiers perform better?
