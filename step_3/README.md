@@ -141,6 +141,30 @@ This trends points to a better model as compared to naive bayes.
 
 ![Model Complexity](model_complexity.png)
 
-Quesiton:
+Question:
 
 What if we increase the number of estimated for the random forest classifiers?
+
+### Random forest classifier with more estimator
+
+Experiment setup:
+
+    - Random forest classifier (n_estimator=500)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - Treebank tokenzier
+    - Top 100 features using mutual information
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.997	0.003
+[*] Average Test Accuracy/Error: 	0.810	0.190
+[*] Average F1: 			0.808
+[*] Average MCC: 			0.629
+```
+
+Question:
+
+Will adding LIWC features move the F1 and MCC up slightly?

@@ -62,7 +62,7 @@ for train, test in ss.split(x_text, y):
     x_text_train_k_best = mutual_info.fit_transform(x_text_train_tfidf, y_train)
 
     from sklearn.ensemble import *
-    clf = RandomForestClassifier().fit(x_text_train_k_best, y_train)
+    clf = RandomForestClassifier(n_estimators=500).fit(x_text_train_k_best, y_train)
     predicted = clf.predict(x_text_train_k_best)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
