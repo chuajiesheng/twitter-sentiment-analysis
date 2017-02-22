@@ -168,3 +168,26 @@ Result:
 Question:
 
 Will adding LIWC features move the F1 and MCC up slightly?
+
+### Random forest classifier with more estimator and LIWC features
+
+Experiment setup:
+
+    - Random forest classifier (n_estimator=500)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - Treebank tokenzier
+    - Top 100 features using mutual information
+    - Additional LIWC features (Analytic, Clout, Authentic, Tone, affect, posemo, negemo)
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.998	0.002
+[*] Average Test Accuracy/Error: 	0.810	0.189
+[*] Average F1: 			0.809
+[*] Average MCC: 			0.630
+```
+
+With LIWC features, it performed a 0.001 better when without. 
