@@ -13,13 +13,13 @@ CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
 K_BEST = 100
+SAMPLE_SIZE = 1500
 dataset = pd.read_excel(INPUT_FILE)
 
 # re-sampling
-sample_size = sum(dataset.relevance == 1)
 y_false = dataset[dataset.relevance == 0].index
 np.random.seed(RANDOM_SEED)
-random_y_false_indices = np.random.choice(y_false, sample_size, replace=False)
+random_y_false_indices = np.random.choice(y_false, SAMPLE_SIZE, replace=False)
 
 indices = np.append(random_y_false_indices, np.array(dataset[dataset.relevance == 1].index))
 
