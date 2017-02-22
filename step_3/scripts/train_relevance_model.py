@@ -23,9 +23,9 @@ random_y_false_indices = np.random.choice(y_false, sample_size, replace=False)
 
 indices = np.append(random_y_false_indices, np.array(dataset[dataset.relevance == 1].index))
 
-x_text = dataset.loc[indices]['body']
-x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']]
-y = dataset.loc[indices]['relevance']
+x_text = dataset.loc[indices]['body'].reset_index(drop=True)
+x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
+y = dataset.loc[indices]['relevance'].reset_index(drop=True)
 
 total_accuracy = 0.0
 total_train_error = 0.0
@@ -45,13 +45,13 @@ class TreebankTokenizer(object):
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
 for train, test in ss.split(x_text, y):
-    x_text_train = x_text.iloc[train]
-    x_liwc_train = x_liwc.iloc[train]
-    y_train = y.iloc[train]
+    x_text_train = x_text.loc[train]
+    x_liwc_train = x_liwc.loc[train]
+    y_train = y.loc[train]
 
-    x_text_test = x_text.iloc[test]
-    x_liwc_test = x_liwc.iloc[test]
-    y_test = y.iloc[test]
+    x_text_test = x_text.loc[test]
+    x_liwc_test = x_liwc.loc[test]
+    y_test = y.loc[test]
 
     vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
     x_text_train_vect = vect.fit_transform(x_text_train)
