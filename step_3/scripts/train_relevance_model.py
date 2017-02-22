@@ -24,7 +24,7 @@ random_y_false_indices = np.random.choice(y_false, sample_size, replace=False)
 indices = np.append(random_y_false_indices, np.array(dataset[dataset.relevance == 1].index))
 
 x_text = dataset.loc[indices]['body']
-x_liwc = dataset.loc[indices][['Analytic','Clout','Authentic','Tone','affect','posemo','negemo','anx','anger','sad','social','family','friend','female','male','percept','see','hear','feel','focuspast','focuspresent','focusfuture','relativ','motion','space','time','work','leisure','home','money','relig','death']]
+x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']]
 y = dataset.loc[indices]['relevance']
 
 total_accuracy = 0.0
