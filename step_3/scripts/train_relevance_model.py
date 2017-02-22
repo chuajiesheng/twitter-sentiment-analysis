@@ -1,7 +1,6 @@
 import numpy as np
 import nltk
 import sklearn
-import tokenizers
 import multiprocessing
 import itertools
 import functools
@@ -27,7 +26,6 @@ indices = np.append(random_y_false_indices, random_y_true_indices)
 print('Total data size: {}'.format(len(indices)))
 
 x_text = dataset.loc[indices]['body'].reset_index(drop=True)
-x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
 y = dataset.loc[indices]['relevance'].reset_index(drop=True)
 
 total_accuracy = 0.0
@@ -49,11 +47,9 @@ class TreebankTokenizer(object):
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
 for train, test in ss.split(x_text, y):
     x_text_train = x_text.loc[train]
-    x_liwc_train = x_liwc.loc[train]
     y_train = y.loc[train]
 
     x_text_test = x_text.loc[test]
-    x_liwc_test = x_liwc.loc[test]
     y_test = y.loc[test]
 
     vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
@@ -62,22 +58,14 @@ for train, test in ss.split(x_text, y):
     tfidf = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)
     x_text_train_tfidf = tfidf.fit_transform(x_text_train_vect)
 
-    mutual_info = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST)
-    x_text_train_k_best = mutual_info.fit_transform(x_text_train_tfidf, y_train)
-
-    all_train_features = scipy.sparse.hstack((x_text_train_k_best, x_liwc_train)).A
-
-    from sklearn.ensemble import *
-
-    clf = RandomForestClassifier(n_estimators=500).fit(all_train_features, y_train)
-    predicted = clf.predict(all_train_features)
+    from sklearn.naive_bayes import MultinomialNB
+    clf = MultinomialNB().fit(x_text_train_tfidf, y_train)
+    predicted = clf.predict(x_text_train_tfidf)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
     x_text_test_vect = vect.transform(x_text_test)
     x_text_test_tfidf = tfidf.transform(x_text_test_vect)
-    x_text_test_k_best = mutual_info.transform(x_text_test_tfidf)
-    all_test_features = scipy.sparse.hstack((x_text_test_k_best, x_liwc_test)).A
-    predicted = clf.predict(all_test_features)
+    predicted = clf.predict(x_text_test_tfidf)
     test_error = 1 - sklearn.metrics.accuracy_score(y_test, predicted)
 
     print('[{}] Accuracy: \t{:.4f}'.format(runs + 1, sklearn.metrics.accuracy_score(y_test, predicted)))
