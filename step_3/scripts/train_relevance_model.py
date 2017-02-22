@@ -18,10 +18,13 @@ dataset = pd.read_excel(INPUT_FILE)
 
 # re-sampling
 y_false = dataset[dataset.relevance == 0].index
+y_true = dataset[dataset.relevance == 1].index
 np.random.seed(RANDOM_SEED)
 random_y_false_indices = np.random.choice(y_false, SAMPLE_SIZE, replace=False)
+random_y_true_indices = np.random.choice(y_true, SAMPLE_SIZE, replace=False)
 
-indices = np.append(random_y_false_indices, np.array(dataset[dataset.relevance == 1].index))
+indices = np.append(random_y_false_indices, random_y_true_indices)
+print('Total data size: {}'.format(len(indices)))
 
 x_text = dataset.loc[indices]['body'].reset_index(drop=True)
 x_liwc = dataset.loc[indices][['Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
