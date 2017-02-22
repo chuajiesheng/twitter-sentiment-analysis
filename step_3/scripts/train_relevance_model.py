@@ -66,7 +66,7 @@ for train, test in ss.split(x_text, y):
 
     from sklearn.ensemble import *
 
-    clf = RandomForestClassifier(n_estimators=500).fit(all_train_features, y_train)
+    clf = RandomForestClassifier().fit(all_train_features, y_train)
     predicted = clf.predict(all_train_features)
     train_error = 1 - sklearn.metrics.accuracy_score(y_train, predicted)
 
