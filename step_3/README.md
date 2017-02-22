@@ -114,4 +114,33 @@ Question:
 Using the previous setup, how does a more complicated model perform?
 e.g. Random forest classifier?
 
+### Random forest classifier
 
+Experiment setup:
+
+    - Random forest classifier (with default values)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - Treebank tokenzier
+    - Top 100 features using mutual information
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.983	0.017
+[*] Average Test Accuracy/Error: 	0.784	0.216
+[*] Average F1: 			0.782
+[*] Average MCC: 			0.577
+```
+
+Basic random forest classifer actually performed better.
+Something to note is that the gap between train and test error seems to increase. 
+The empricial error decrease (and thus moving towards overfitting) as the model complexity increase, while true error decrease only slightly.
+This trends points to a better model as compared to naive bayes.
+
+![Model Complexity](model_complexity.png)
+
+Quesiton:
+
+What if we increase the number of estimated for the random forest classifiers?
