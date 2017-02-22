@@ -1,6 +1,7 @@
 import numpy as np
 import nltk
 import sklearn
+import tokenizers
 import multiprocessing
 import itertools
 import functools
@@ -36,12 +37,12 @@ total_mcc = 0.0
 runs = 0
 
 
-class TreebankTokenizer(object):
+class SentimentTokenizer(object):
     def __init__(self):
-        self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
+        self.sentiment_aware_tokenize = tokenizers.happy_tokenizer.Tokenizer().tokenize
 
     def __call__(self, doc):
-        return self.treebank_word_tokenize(doc)
+        return self.sentiment_aware_tokenize(doc)
 
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
@@ -52,7 +53,7 @@ for train, test in ss.split(x_text, y):
     x_text_test = x_text.loc[test]
     y_test = y.loc[test]
 
-    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())
+    vect = sklearn.feature_extraction.text.CountVectorizer(tokenizer=SentimentTokenizer())
     x_text_train_vect = vect.fit_transform(x_text_train)
 
     tfidf = sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)

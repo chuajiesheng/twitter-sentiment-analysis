@@ -25,3 +25,34 @@ Result:
 [*] Average F1: 			0.811
 [*] Average MCC: 			0.623
 ```
+
+Question:
+
+We follow up with comparing if a sentiment-aware tokenizer will perform better than the widely accepted treebank-style tokenzier.
+
+### Sentiment-aware tokenizers
+
+Experiment setup:
+
+    - Naive Bayers classifier (with default values)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - [Sentiment-aware tokenzier](http://sentiment.christopherpotts.net/tokenizing.html)
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.843	0.157
+[*] Average Test Accuracy/Error: 	0.784	0.216
+[*] Average F1: 			0.784
+[*] Average MCC: 			0.569
+```
+
+From our experiment, a treebank-style tokenizer performed better.
+Therefore, we will use this tokenizer to formulate our final solutions.
+
+Question:
+
+There is a 0.05 to 0.07 gap between our training error and testing error. Could we reduce this gap by reducing overfitting in our model?
+E.g. using mutal information to select top 100 features?
