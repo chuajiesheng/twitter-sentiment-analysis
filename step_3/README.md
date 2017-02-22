@@ -84,3 +84,34 @@ To reduce over-fitting and reduce our feature size, we decide to take this appro
 Question:
 
 If we include LIWC features, will our classifiers perform better?
+
+### Using output from LIWC as features
+
+Experiment setup:
+
+    - Naive Bayers classifier (with default values)
+    - 10-fold cross validation
+    - Stratified shuffle split (same number of each class per split)
+    - 80% training data, 20% testing data
+    - Treebank tokenzier
+    - Top 100 features using mutual information
+    - Additional LIWC features (Analytic, Clout, Authentic, Tone, affect, posemo, negemo)
+
+Result:
+
+```
+[*] Average Train Accuracy/Error: 	0.619	0.381
+[*] Average Test Accuracy/Error: 	0.630	0.370
+[*] Average F1: 			0.630
+[*] Average MCC: 			0.260
+```
+
+Using LIWc features actually decrease all the score of the mdoel. 
+This implies that the LIWC features does not help in our relevance model.
+
+Question:
+
+Using the previous setup, how does a more complicated model perform?
+e.g. Random forest classifier?
+
+
