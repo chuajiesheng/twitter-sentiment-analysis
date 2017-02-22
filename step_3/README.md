@@ -190,4 +190,4 @@ Result:
 [*] Average MCC: 			0.630
 ```
 
-With LIWC features, it performed a 0.001 better when without. 
+With LIWC features, it performed a 0.001 better than without. 
