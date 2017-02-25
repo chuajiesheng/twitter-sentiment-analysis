@@ -166,7 +166,7 @@ pipeline = Pipeline([
              sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST))
         ]))
     ])),
-    ('classifier', RandomForestClassifier(n_estimators=500))
+    ('classifier', RandomForestClassifier(n_estimators=50))
 ])
 
 total_accuracy = 0.0
