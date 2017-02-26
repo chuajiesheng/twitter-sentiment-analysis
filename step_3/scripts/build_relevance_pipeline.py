@@ -20,7 +20,8 @@ indices = np.append(random_indices(dataset[dataset.relevance == 0]),
                     [random_indices(dataset[dataset.relevance == 1])])
 print('Total data size: {}'.format(len(indices)))
 
-X = dataset.loc[indices][['body', 'Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(drop=True)
+X = dataset.loc[indices][['body', 'Analytic', 'Clout', 'Authentic', 'Tone', 'affect', 'posemo', 'negemo']].reset_index(
+    drop=True)
 y = dataset.loc[indices]['relevance'].reset_index(drop=True)
 
 
@@ -140,6 +141,7 @@ class WordClusterTransformer(sklearn.base.TransformerMixin):
     def fit(self, X, y=None, **fit_params):
         return self
 
+
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import RandomForestClassifier
 
@@ -174,7 +176,8 @@ total_test_error = 0.0
 total_f1 = 0.0
 runs = 0
 
-ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None, random_state=RANDOM_SEED)
+ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None,
+                                                    random_state=RANDOM_SEED)
 for train, test in ss.split(X, y):
     pipeline.fit(X.loc[train], y.loc[train])
     predicted_train = pipeline.predict(X.loc[train])
@@ -194,6 +197,7 @@ for train, test in ss.split(X, y):
     total_f1 += f1_score
     runs += 1
 
-print('[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs,                                                                   total_train_error / runs))
+print(
+    '[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs, total_train_error / runs))
 print('[*] Average Test Accuracy/Error: \t{:.3f}\t{:.3f}'.format(total_accuracy / runs, total_test_error / runs))
 print('[*] Average F1: \t\t\t{:.3f}'.format(total_f1 / runs))
