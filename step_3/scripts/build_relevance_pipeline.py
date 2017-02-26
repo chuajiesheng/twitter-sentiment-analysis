@@ -244,7 +244,7 @@ tweets_dataframe = pd.read_csv(TWEETS_FILE, iterator=True, chunksize=SAMPLE_SIZE
 total_tweets = 0
 for chunk in tweets_dataframe:
     predicted_chunk = pipeline.predict(chunk)
-    chunk.assign(relevance=predicted_chunk).to_csv(OUTPUT_FILE, header=False, mode='a')
+    chunk.assign(relevance=predicted_chunk).to_csv(OUTPUT_FILE, header=False, mode='a', index=False)
     total_tweets += len(predicted_chunk)
     print('.', end='', flush=True)
 
