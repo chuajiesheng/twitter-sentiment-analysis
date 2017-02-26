@@ -4,13 +4,17 @@ import sklearn
 import pandas as pd
 import os
 import shlex
+import hashlib
 
 INPUT_FILE = './step_3/input/relevance.xlsx'
+TWEETS_FILE = './step_3/input/all_tweets.csv'
+OUTPUT_FILE = './step_3/output/relevance.csv'
 CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
 K_BEST = 100
 SAMPLE_SIZE = 1500
+CLASSIFY = True
 dataset = pd.read_excel(INPUT_FILE)
 
 np.random.seed(RANDOM_SEED)
@@ -142,6 +146,19 @@ class WordClusterTransformer(sklearn.base.TransformerMixin):
         return self
 
 
+def sha(filename):
+    BUF_SIZE = 65536
+
+    sha1 = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest()
+
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import RandomForestClassifier
 
@@ -201,3 +218,36 @@ print(
     '[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs, total_train_error / runs))
 print('[*] Average Test Accuracy/Error: \t{:.3f}\t{:.3f}'.format(total_accuracy / runs, total_test_error / runs))
 print('[*] Average F1: \t\t\t{:.3f}'.format(total_f1 / runs))
+
+if not CLASSIFY:
+    exit(0)
+
+print('\nConstructing model\n')
+
+try:
+    os.remove(OUTPUT_FILE)
+    print('{} file removed to prevent appending new result'.format(OUTPUT_FILE))
+except OSError:
+    pass
+
+pipeline.fit(X, y)
+predicted_train = pipeline.predict(X)
+
+accuracy_score = sklearn.metrics.accuracy_score(y, predicted_train)
+test_error = 1 - accuracy_score
+f1_score = sklearn.metrics.f1_score(y, predicted_train, average='macro')
+
+print('[{}] Accuracy: \t{:.4f}'.format('Model', accuracy_score))
+print('[{}] Macro F1: \t{:.4f}'.format('Model', f1_score))
+
+tweets_dataframe = pd.read_csv(TWEETS_FILE, iterator=True, chunksize=SAMPLE_SIZE)
+total_tweets = 0
+for chunk in tweets_dataframe:
+    predicted_chunk = pipeline.predict(chunk)
+    chunk.assign(relevance=predicted_chunk).to_csv(OUTPUT_FILE, header=False, mode='a')
+    total_tweets += len(predicted_chunk)
+    print('.', end='', flush=True)
+
+print('')
+print('Completed predicting {} tweets'.format(total_tweets))
+print('SHA of {}: {}'.format(OUTPUT_FILE, sha(OUTPUT_FILE)))
