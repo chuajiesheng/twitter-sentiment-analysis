@@ -12,9 +12,8 @@ OUTPUT_FILE = './step_4/output/sentiment.csv'
 CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
-K_BEST = 100
 SAMPLE_SIZE = 1500
-CLASSIFY = False
+CLASSIFY = True
 dataset = pd.read_excel(INPUT_FILE)
 
 np.random.seed(RANDOM_SEED)
