@@ -12,9 +12,8 @@ OUTPUT_FILE = './step_3/output/relevance.csv'
 CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
-K_BEST = 100
 SAMPLE_SIZE = 1500
-CLASSIFY = True
+CLASSIFY = False
 dataset = pd.read_excel(INPUT_FILE)
 
 np.random.seed(RANDOM_SEED)
@@ -50,7 +49,8 @@ class TreebankTokenizer(object):
         self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
 
     def __call__(self, doc):
-        return self.treebank_word_tokenize(doc)
+        from nltk.util import ngrams
+        return ngrams(self.treebank_word_tokenize(doc), 2)
 
 
 class SubjectivityTransformer(sklearn.base.TransformerMixin):
@@ -179,9 +179,7 @@ pipeline = Pipeline([
         ('words', Pipeline([
             ('extract', WordExtractor()),
             ('count_vec', sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())),
-            ('td_idf', sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)),
-            ('k_best',
-             sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST))
+            ('td_idf', sklearn.feature_extraction.text.TfidfTransformer(use_idf=False))
         ]))
     ])),
     ('classifier', RandomForestClassifier(n_estimators=50))
