@@ -189,6 +189,7 @@ total_accuracy = 0.0
 total_train_error = 0.0
 total_test_error = 0.0
 total_f1 = 0.0
+total_mcc = 0.0
 runs = 0
 
 ss = sklearn.model_selection.StratifiedShuffleSplit(n_splits=CV, train_size=TRAIN_SIZE, test_size=None,
@@ -201,21 +202,25 @@ for train, test in ss.split(X, y):
     accuracy_score = sklearn.metrics.accuracy_score(y.loc[test], predicted_test)
     test_error = 1 - accuracy_score
     f1_score = sklearn.metrics.f1_score(y.loc[test], predicted_test, average='macro')
+    mcc_score = sklearn.metrics.matthews_corrcoef(y.loc[test], predicted_test)
 
     print('[{}] Accuracy: \t{:.4f}'.format(runs + 1, accuracy_score))
     print('[{}] Macro F1: \t{:.4f}'.format(runs + 1, f1_score))
+    print('[{}] MCC: \t{:.4f}'.format(runs + 1, mcc_score))
     print(sklearn.metrics.confusion_matrix(y.loc[test], predicted_test))
 
     total_accuracy += accuracy_score
     total_train_error += (1 - sklearn.metrics.accuracy_score(y.loc[train], predicted_train))
     total_test_error += test_error
     total_f1 += f1_score
+    total_mcc += mcc_score
     runs += 1
 
-print(
-    '[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs, total_train_error / runs))
+print('[*] Average Train Accuracy/Error: \t{:.3f}\t{:.3f}'.format(1 - total_train_error / runs, total_train_error / runs))
 print('[*] Average Test Accuracy/Error: \t{:.3f}\t{:.3f}'.format(total_accuracy / runs, total_test_error / runs))
 print('[*] Average F1: \t\t\t{:.3f}'.format(total_f1 / runs))
+print('[*] Average MCC: \t\t\t{:.3f}'.format(total_mcc / runs))
+
 
 if not CLASSIFY:
     exit(0)
