@@ -12,6 +12,7 @@ CV = 10
 TRAIN_SIZE = 0.8
 RANDOM_SEED = 42
 SAMPLE_SIZE = 1500
+K_BEST = 100
 CLASSIFY = True
 dataset = pd.read_excel(INPUT_FILE)
 
@@ -44,28 +45,12 @@ class LiwcFeatureExtractor(sklearn.base.TransformerMixin):
         return self
 
 
-class WhitespaceTokenizer(object):
-    def __init__(self):
-        pass
-
-    def __call__(self, doc):
-        return doc.split(' ')
-
-
 class TreebankTokenizer(object):
     def __init__(self):
         self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
 
     def __call__(self, doc):
         return self.treebank_word_tokenize(doc)
-
-
-class SentimentTokenizer(object):
-    def __init__(self):
-        self.sentiment_aware_tokenize = tokenizers.happy_tokenizer.Tokenizer().tokenize
-
-    def __call__(self, doc):
-        return self.sentiment_aware_tokenize(doc)
 
 
 class SubjectivityTransformer(sklearn.base.TransformerMixin):
@@ -175,7 +160,7 @@ def sha(filename):
     return sha1.hexdigest()
 
 from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 
 pipeline = Pipeline([
     ('features', FeatureUnion([
@@ -194,10 +179,11 @@ pipeline = Pipeline([
         ('words', Pipeline([
             ('extract', WordExtractor()),
             ('count_vec', sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())),
-            ('td_idf', sklearn.feature_extraction.text.TfidfTransformer(use_idf=False))
+            ('td_idf', sklearn.feature_extraction.text.TfidfTransformer(use_idf=False)),
+            ('k_best', sklearn.feature_selection.SelectKBest(sklearn.feature_selection.mutual_info_classif, k=K_BEST))
         ]))
     ])),
-    ('classifier', RandomForestClassifier(n_estimators=50))
+    ('classifier', LogisticRegression())
 ])
 
 total_accuracy = 0.0
