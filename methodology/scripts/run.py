@@ -50,7 +50,8 @@ class TreebankTokenizer(object):
         self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
 
     def __call__(self, doc):
-        return self.treebank_word_tokenize(doc)
+        from nltk.util import skipgrams
+        return skipgrams(self.treebank_word_tokenize(doc), 3, 3)
 
 
 class SubjectivityTransformer(sklearn.base.TransformerMixin):
