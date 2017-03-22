@@ -50,8 +50,7 @@ class TreebankTokenizer(object):
         self.treebank_word_tokenize = nltk.tokenize.treebank.TreebankWordTokenizer().tokenize
 
     def __call__(self, doc):
-        from nltk.util import skipgrams
-        return skipgrams(self.treebank_word_tokenize(doc), 3, 3)
+        return self.treebank_word_tokenize(doc)
 
 
 class SubjectivityTransformer(sklearn.base.TransformerMixin):
@@ -165,18 +164,18 @@ from sklearn.linear_model import LogisticRegression
 
 pipeline = Pipeline([
     ('features', FeatureUnion([
-        # ('liwc', Pipeline([
-        #     ('extract', LiwcFeatureExtractor())
-        # ])),
-        # ('subjectivity', Pipeline([
-        #     ('extract', WordExtractor()),
-        #     ('subjectivity_vec', SubjectivityTransformer())
-        # ])),
-        # ('word_cluster', Pipeline([
-        #     ('extract', WordExtractor()),
-        #     ('word_vec', WordClusterTransformer()),
-        #     ('dict_vec', sklearn.feature_extraction.DictVectorizer())
-        # ])),
+        ('liwc', Pipeline([
+            ('extract', LiwcFeatureExtractor())
+        ])),
+        ('subjectivity', Pipeline([
+            ('extract', WordExtractor()),
+            ('subjectivity_vec', SubjectivityTransformer())
+        ])),
+        ('word_cluster', Pipeline([
+            ('extract', WordExtractor()),
+            ('word_vec', WordClusterTransformer()),
+            ('dict_vec', sklearn.feature_extraction.DictVectorizer())
+        ])),
         ('words', Pipeline([
             ('extract', WordExtractor()),
             ('count_vec', sklearn.feature_extraction.text.CountVectorizer(tokenizer=TreebankTokenizer())),
