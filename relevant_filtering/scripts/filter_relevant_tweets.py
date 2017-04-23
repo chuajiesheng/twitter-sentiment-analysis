@@ -81,31 +81,8 @@ files = list(map(convert_to_full_path, read_directory(DIRECTORY)))
 assert len(files) == 21888
 
 
-def add_to_sorted_dict(ordered_dict, retweet_count, tweet):
-    if len(ordered_dict) > 0:
-        ordered_dict = OrderedDict(sorted(ordered_dict.items(), key=lambda t: t[0], reverse=True))
-
-    current_min = min(ordered_dict, default=0)
-    if current_min >= retweet_count:
-        return ordered_dict
-
-    if len(ordered_dict) > 9:
-        last_item = ordered_dict.popitem()
-
-        min_count = min(ordered_dict)
-        assert min_count >= last_item[0]
-
-    assert(len(ordered_dict)) < 10
-    ordered_dict[retweet_count] = tweet
-
-    return ordered_dict
-
-top_10_tweets = OrderedDict()
 for filename in files:
     tweets = read_file(filename)
     for t in tweets:
         if t['id'] in tweet_ids:
-            top_10_tweets = add_to_sorted_dict(top_10_tweets, t['retweetCount'], t)
-    print('.', end='', flush=True)
-
-print(top_10_tweets)
+            print(t)
